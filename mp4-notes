@@ -1,7 +1,7 @@
 # WHAT IS MP4?
 
 MP4 is an extension of the ISO Base Media File Format, also a container format (directly based
-on QuickTime file format, so MP4 is effectively identical to QuickTime).
+on QuickTime file format, so MP4 is effectively identical to QuickTime)
 
 ## RESOURCES USED
 
@@ -10,6 +10,7 @@ https://dev.to/alfg/a-quick-dive-into-mp4-57fo
 https://en.wikipedia.org/wiki/MPEG_elementary_stream
 https://docs.cycling74.com/max5/tutorials/jit-tut/jitterappendixa.html
 https://www.youtube.com/watch?v=U0EuPqhiuGQ
+
 
 ## MP4 General Structures
 
@@ -26,7 +27,6 @@ https://www.youtube.com/watch?v=U0EuPqhiuGQ
     │       └───audio sample data
     └───more metadata
 
-
 MP4 is a *container* format, likewise is .mov, .webm, .mp3, .wav, etc.
 
     - because it is a container format, MP4 does not handle the encoding or decoding, it
@@ -39,7 +39,7 @@ MP4 is a *container* format, likewise is .mov, .webm, .mp3, .wav, etc.
     sequence of four bytes (typically ASCII) used to uniquely identify data formats). *The
     names of these data formats are important when we speak about parsing*. See below.
 
-@lowerView -> THIS IS STILL A SIMPLIFIED VIEW
+THIS IS STILL A SIMPLIFIED VIEW
 video.mp4
 ├───ftyp -------------------> FileType Box
 ├───mdat -------------------> Movie Data Box
@@ -86,6 +86,9 @@ mdat -> Movie Data
     crucial data, like the chunk offset between different tracks
 
 ## MOOV HEADER - LOTS OF INFO. COMPLICATED STRUCTURE THAT CONTAINS LOTS OF INFO
+
+UNLESS AN AUDIO TRACK ALTERNATIVE IS STATED, IT IS THE SAME
+
 moov -> Movie Boxes
     - a box containing sub-boxes/sub-IODs/sub-ODs used to present individual track info for playback
 
@@ -148,6 +151,54 @@ tkhd - Track Header
     layer value = higher up on layers. Tracks with lower layers values overlay those with higher
 
     - track specifies matrix structure ("A matrix shows how to map points from one coordinate space into another")
+        - matrix controls rotation, scaling, and translation of tracks, comprised of 9 int32s
+
+        | a  b  u |
+        | c  d  v |
+        | tx ty w |
+
+        a, d: Scaling factors along the x and y axes.
+        b, c: Controls rotation.
+        tx, ty: Translation (positioning) offsets.
+        u, v, w: Typically used for perspective (usually 0, 0, 1).
+
+        - this is done with the following processes:
+        | a*cos(θ) -a*sin(θ)  0.0 |
+        | d*sin(θ)  d*cos(θ)  0.0 |
+        | tx         ty       1.0 |
+
+        - this is a typical 2D z-axis matrix. b multiplies x values, minus x because it is rotating counter-clockwise by
+        default (of couse, just supply a negative b to make this clockwise). c multiplies the y values. Think of a 4
+        sector graph, and multiplying the x/y values and where it drags them to. The video is on a 4 sector grid.
+
+        - so, technically, the previous diagram is inaccurate in that, whilst they are all different numbers, the pairs
+        of a and b and c and d share values
+
+        - so when scaling with no rotation, you are still multiplying by cos(theta), but cos(0) is one. Similarly,
+        sin(0) is 0, but a 0 value of b and c means it makes no difference no matter the number
+
+        - of course, if you solely want rotation, then only change b and c
+
+        Scaling:
+        | 2.0  0.0  0.0 |  // Double width
+        | 0.0  2.0  0.0 |  // Double height
+        | 0.0  0.0  1.0 |
+
+        Rotation:
+        | 0.0 -1.0  0.0 |
+        | 1.0  0.0  0.0 |
+        | 0.0  0.0  1.0 | // gives a 90 degree rotation
+        // 1 in rotation = 90 degrees turn. sin(90) == 1
+
+        Translation:
+        | 1.0  0.0  0.0  |
+        | 0.0  1.0  0.0  |
+        | 50.0 100.0 1.0 |  // Moves video right by 50 units, up by 100 units
+
+        - for audio, matrixs dont apply and a default "identity matrix" is stated, with no transformation
+        | 1.0  0.0  0.0 |
+        | 0.0  1.0  0.0 |
+        | 0.0  0.0  1.0 |
 
     - track width and height stated in pixels as an int32
 
@@ -182,9 +233,10 @@ hdlr - Handler
     ├── mhlr - indicates handler handles media types (video, audio, text, hint tracks, metadata, etc)
     ├── dhlr - indicates handler handles data references, either external or in the file (URLs, Macintosh aliases, URNs, etc)
 
-    -  component subtypes define the subtype that the subtype handles via three letter names (i.e. video = vide, url = url, etc)
+    -  component subtypes define the subtype that the subtype handles via three letter names (i.e. video = vide, url = url, etc).
+    The subtype is not actually a sub field like in an atom structure, just another field
 
-    - a final atom of a "component name" that provides a human readable informational name for the data handler
+    - a final atom of a "component name" that provides a human readable informational name for the data handler, null terminated
 
 minf - Media Information
     - seemingly just states *more* media information is beginning
@@ -289,7 +341,7 @@ stsd - Sample Description - AUDIO
 
     - then proceeds into channel count - i.e. stereo has two channel counts, a left and right speaker
 
-    - contains a sample size followed by a reserved, an int16 stating how many bytes are contained in each audio sample. This is applicable for audio and notvvideo because audio samples are always a set size as oppossed to video, which is not a set size
+    - contains a sample size followed by a reserved, an int16 stating how many bytes are contained in each audio sample. This is applicable for audio and not video because audio samples are always a set size as oppossed to video, which is not a set size
     per frame. Instead, the stsz box defines the size of each video frame, how many there are, etc
 
     - contains an audio sample rate followed by a reserved
@@ -320,7 +372,7 @@ stsd - Sample Description - AUDIO
 stts - Time To Sample
     - contains a "number of entries", stating how many entries in the time to sample table follow
 
-    - the tts table contains the amount of consecutive frames with the same sample duration, and then the sample duration, measured
+    - the tts table contains the amount of consecutive samples with the same sample duration, and then the sample duration, measured
     in the tracks timescale
 
 stss - Sync Samples
@@ -334,6 +386,7 @@ stss - Sync Samples
 
     - of course, contains a "number of entries" area
 
+    - NOT INCLUDED FOR AUDIO
     - documentation stated stss atom has a "sample duration" but i think that a load of crap
 
 stsc - Samples To Chunk
