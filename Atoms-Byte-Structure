@@ -1,0 +1,202 @@
+Top-Level Atoms
+
+ftyp –
+4 bytes size
+4 bytes 'ftyp'
+4 bytes major_brand
+4 bytes minor_version
+4n bytes compatible_brands (array of 4-byte codes)
+
+mdat –
+4 bytes size
+4 bytes 'mdat'
+n bytes media data (raw audio/video)
+
+moov –
+4 bytes size
+4 bytes 'moov'
+n bytes child boxes (e.g., mvhd, trak, etc.)
+
+Inside moov
+
+mvhd –
+4 bytes size
+4 bytes 'mvhd'
+1 byte version
+3 bytes flags
+4 or 8 bytes creation_time
+4 or 8 bytes modification_time
+4 bytes timescale
+4 or 8 bytes duration
+4 bytes rate
+2 bytes volume
+10 bytes reserved
+36 bytes matrix
+24 bytes pre-defined
+4 bytes next_track_ID
+
+trak –
+4 bytes size
+4 bytes 'trak'
+n bytes child boxes (tkhd, mdia, etc.)
+
+Inside trak
+
+tkhd –
+4 bytes size
+4 bytes 'tkhd'
+1 byte version
+3 bytes flags
+4 or 8 bytes creation_time
+4 or 8 bytes modification_time
+4 bytes track_ID
+4 bytes reserved
+4 or 8 bytes duration
+8 bytes reserved
+2 bytes layer
+2 bytes alternate_group
+2 bytes volume
+2 bytes reserved
+36 bytes matrix
+4 bytes width (fixed-point)
+4 bytes height (fixed-point)
+
+mdia –
+4 bytes size
+4 bytes 'mdia'
+n bytes child boxes (mdhd, hdlr, minf)
+
+Inside mdia
+
+mdhd –
+4 bytes size
+4 bytes 'mdhd'
+1 byte version
+3 bytes flags
+4 or 8 bytes creation_time
+4 or 8 bytes modification_time
+4 bytes timescale
+4 or 8 bytes duration
+2 bytes language
+2 bytes pre-defined
+
+hdlr –
+4 bytes size
+4 bytes 'hdlr'
+1 byte version
+3 bytes flags
+4 bytes pre_defined
+4 bytes handler_type
+12 bytes reserved
+n bytes name (null-terminated string)
+
+minf –
+4 bytes size
+4 bytes 'minf'
+n bytes child boxes (vmhd/smhd, dinf, stbl)
+
+Inside minf
+
+vmhd –
+4 bytes size
+4 bytes 'vmhd'
+1 byte version
+3 bytes flags
+2 bytes graphicsmode
+6 bytes opcolor (3 x 2-byte RGB)
+
+smhd –
+4 bytes size
+4 bytes 'smhd'
+1 byte version
+3 bytes flags
+2 bytes balance
+2 bytes reserved
+
+dinf –
+4 bytes size
+4 bytes 'dinf'
+n bytes child box 'dref'
+
+dref –
+4 bytes size
+4 bytes 'dref'
+1 byte version
+3 bytes flags
+4 bytes entry_count
+n bytes data references (e.g., url boxes)
+
+stbl –
+4 bytes size
+4 bytes 'stbl'
+n bytes child boxes (stsd, stts, stss, stsc, stsz, stco)
+
+Inside stbl
+
+stsd –
+4 bytes size
+4 bytes 'stsd'
+1 byte version
+3 bytes flags
+4 bytes entry_count
+n bytes sample entry (e.g., 'avc1', 'mp4a' box)
+
+stts –
+4 bytes size
+4 bytes 'stts'
+1 byte version
+3 bytes flags
+4 bytes entry_count
+n x 8 bytes (sample_count + sample_delta)
+
+stss –
+4 bytes size
+4 bytes 'stss'
+1 byte version
+3 bytes flags
+4 bytes entry_count
+n x 4 bytes sample_number
+
+stsc –
+4 bytes size
+4 bytes 'stsc'
+1 byte version
+3 bytes flags
+4 bytes entry_count
+n x 12 bytes (first_chunk + samples_per_chunk + sample_description_index)
+
+stsz –
+4 bytes size
+4 bytes 'stsz'
+1 byte version
+3 bytes flags
+4 bytes sample_size
+4 bytes sample_count
+n x 4 bytes entry_size (if sample_size == 0)
+
+stco –
+4 bytes size
+4 bytes 'stco'
+1 byte version
+3 bytes flags
+4 bytes entry_count
+n x 4 bytes chunk_offset
+
+Other moov Children
+
+iods –
+4 bytes size
+4 bytes 'iods'
+n bytes object descriptor (variable length – binary-encoded)
+
+udta –
+4 bytes size
+4 bytes 'udta'
+n bytes user data (could include ©nam, ©ART, etc.)
+
+meta –
+4 bytes size
+4 bytes 'meta'
+1 byte version
+3 bytes flags
+n bytes child boxes (hdlr, ilst, etc.)

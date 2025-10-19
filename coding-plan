@@ -1,0 +1,6 @@
+- use basic test videos to construct chunk and sample classes
+- create ability to split samples into decode units (frames). AVC NAL units
+- create working prototype of MP4 parser which can gather and return correct info about frames
+- display basic individual frames using external AVC decoder
+- frame chaining at correct fps
+- own AVC decoder?

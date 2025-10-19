@@ -1,0 +1,441 @@
+# WHAT IS MP4?
+
+MP4 is an extension of the ISO Base Media File Format, also a container format (directly based
+on QuickTime file format, so MP4 is effectively identical to QuickTime)
+
+## RESOURCES USED
+
+https://www.cimarronsystems.com/wp-content/uploads/2017/04/Elements-of-the-H.264-VideoAAC-Audio-MP4-Movie-v2_0.pdf
+https://dev.to/alfg/a-quick-dive-into-mp4-57fo
+https://en.wikipedia.org/wiki/MPEG_elementary_stream
+https://docs.cycling74.com/max5/tutorials/jit-tut/jitterappendixa.html
+https://www.youtube.com/watch?v=U0EuPqhiuGQ
+https://en.wikipedia.org/wiki/Rotation_matrix
+https://chatgpt.com
+
+
+## MP4 General Structures
+
+### High Level View
+    video.mp4
+    ├───general file metadata
+    ├───movie data
+    ├───tracks
+    │   ├───video
+    │   │   ├───video metadata
+    │   │   └───video sample data
+    │   └───audio
+    │       ├───audio metadata
+    │       └───audio sample data
+    └───more metadata
+
+MP4 is a *container* format, likewise is .mov, .webm, .mp3, .wav, etc.
+
+    - because it is a container format, MP4 does not handle the encoding or decoding, it
+    just contains audio and video as tracks with metadata
+
+    - MP4 byte structure is comprised of boxes, known as "atoms", that build up the
+    container. Follows QuickTime specification
+
+    - the boxes follow a FourCC naming convention (A FourCC ("four-character code") is a
+    sequence of four bytes (typically ASCII) used to uniquely identify data formats). *The
+    names of these data formats are important when we speak about parsing*. See below.
+
+THIS IS STILL A SIMPLIFIED VIEW
+video.mp4
+├───ftyp -------------------> FileType Box
+├───mdat -------------------> Movie Data Box
+├───moov -------------------> Movie Boxes
+│   ├───trak ---------------> Track Box
+│   │   ├─── tkhd ----------> Track Header
+│   │   └─── mdia ----------> Media Box
+│   │        └─── ...
+│   └───trak
+│   │   ├─── tkhd ----------> Track Header
+│   │   └─── mdia ----------> Media Box
+│   │        └─── ...
+└───udta -------------------> Userdata Box
+
+### Box (Typical) Structure
+- Box Size (in bytes) - 4 Bytes
+- Box FourCC name - 4 Bytes
+- Box Data - N Bytes
+
+┌───────────────────────┐
+|      Box Header       |
+| Size (4) | FourCC (4) | Box Header = 8 Bytes
+| ──────────────────────|
+|      Box Data (N)     | Box Data = N Bytes
+└───────────────────────┘
+           └─────────── Box Size = 8 + N bytes
+
+ftyp -> File Type
+    - specified by the ISO BMFF
+
+    - specifies a Major Brand data piece - basically what filetype the file actually is
+
+    - specifies a Minor Version - what version the Major Brand actually is
+
+    - specifies Compatible Brands, list of compatible file formats
+
+    - whilst ftyp is suppossed to be specified, backwards compatibility forces parsers to assume that those without
+    an ftyp box are "mp41" (MP4 v1).
+
+mdat -> Movie Data
+    - contains the raw data for the applicable tracks in the MP4 presentation
+
+    - to parse this, you must first parse the moov atom, in order to locate
+    crucial data, like the chunk offset between different tracks
+
+## MOOV HEADER - LOTS OF INFO. COMPLICATED STRUCTURE THAT CONTAINS LOTS OF INFO
+
+UNLESS AN AUDIO TRACK ALTERNATIVE IS STATED, IT IS THE SAME
+
+moov -> Movie Boxes
+    - a box containing sub-boxes/sub-IODs/sub-ODs used to present individual track info for playback
+
+    - can contain video, audio, etc metadata
+
+    - in the case that the file is set up for progressive playback (ability to play whilst downloading),
+    the moov atom precedes the mdat atom
+
+    - sometimes, like in the case of VoDs, the moov is on the end (like in the diagram example).
+
+moov
+  ├── mvhd
+  ├── trak
+  │   ├── tkhd
+  │   ├── mdia
+  │   │   ├── mdhd
+  │   │   ├── hdlr
+  │   │   ├── minf
+  │   │       ├── vmhd (for video track) or smhd (for audio track)
+  │   │       ├── dinf
+  │   │       ├── stbl
+  │   │           ├── stsd
+  │   │           ├── stts
+  │   │           ├── stss (for video track)
+  │   │           ├── stsc
+  │   │           ├── stsz
+  │   │           ├── stco
+  ├── trak (another track, same structure as above)
+  ├── iods
+  ├── udta
+  ├── meta
+
+mvhd -> Movie Header
+    - holds info on start time, duration, and time scale, creation and modification time of the moov header
+
+    - time scale is how many generic "time values" make up one second of a movie. Effectively, QuickTime doesnt
+    actually use fps. Instead, timescale is used, with the default being 600 time values per second. QuickTime
+    fps is defined as how many times a movie changes, so a movie with a default timescale that changes every 60
+    time values has 10fps. QuickTime fps is made by the concept of *"interesting time"*, which only counts "interesting"
+    frames as frames, rather than any decoded unit (i.e. invisible units aren't interesting).
+
+trak - Track Atom
+    - seemingly just states track information is beginning
+
+tkhd - Track Header
+    - key info for this header is the existentence of the Track ID, an int32 that cannot be 0 and identifies track.
+    The track duration is also present
+
+├── track duration calculated via the sum of the duration of all track edits in the edit list. If there is no edit
+│   list, the sum of all "sample durations" (how long each frame lasts for in timescale duration) is used.
+│
+├── track edits and edit lists: contained in edts boxes which contain elst (edit list) boxes. Segment durations of
+    an elst entry are done in video timescale (i.e. a segment duration of 6000 with default timescale lasts for 10
+    seconds), being paired with "media time" (where the entry starts from in the track *not the movie*, also measured
+    in timescale BUT in track timescale defined in the mdhd atom - 6000 would start 10 secs into track with default
+    timescale) and "Media Rate" (how fast the track should play, 1 is normal rate. It divides the segment duration, so
+    a default timescale lasting 6000 units with a 0.5 media rate has an *effective* track duration of 12000 units, 20 seconds).
+
+    - specifies an int16 for "Layer" - QuickTime Movie Toolbox uses this to determine overlay of tracks. Lower
+    layer value = higher up on layers. Tracks with lower layers values overlay those with higher
+
+    - track width and height stated in pixels as an int32
+
+    - specifies an "alternative group" for the track for when a collection of track specify alternative data for
+    each other (i.e. audio tracks that are all the same but in different languages). a "trgr" atom supplies IDs for
+    alternative tracks in the group. 0x0000 altr does not imply no group, no trgr is more reliable for this.
+
+    - track specifies matrix structure ("A matrix shows how to map points from one coordinate space into another")
+        - mp4 utilises affine 2d transformation matrices to describe any edits that should occur to points, changing
+        video scale, rotation, or emulating 3d perspective
+        - matrix controls rotation, scaling, and translation of tracks, comprised of 9 int32s
+
+### TRACK MATRICES
+
+        The track header supplies a TEMPLATE for general point transformation, supplying the
+        constants to be applied to x and y values. The x and y values are in the context of
+        track max height and width (i.e. a track with 1920x1080 resolution can supply x and
+        y values of 0-1919 and 0-1079 respectively)
+
+        | a    c    u |
+        | b    d    v |
+        | tx   ty   w |
+
+        a, d: Scaling factors along the x and y axes respectively OR used for rotation.
+        b, c: Controls rotation.
+        tx, ty: Simple translation (positioning) offsets. Added to end x and y product. Rarely used.
+        u, v, w: Typically used for perspective (usually 0, 0, 1).
+
+
+        #### ROTATION AND SCALING:
+
+            | cos(θ) -sin(θ)  0.0 |
+            | sin(θ)  cos(θ)  0.0 |
+            | tx      ty      1.0 |
+
+            - when rotating, a, b, c, and d ALL act like a typical 2D rotation matrix, it uses trig
+            identities in order to rotate a point (x,y) to a new point (x',y') by inputting the angle
+            from the x axis you want the new point at (i.e. a point 30 degrees from the x axis that we
+            want to rotate by 45 degrees, we input 70 degrees).
+
+            x' = x*cos(theta) - y*sin(theta)
+            y = x*sin(theta) + y*cos(theta)
+
+            ROTATING WHILST SCALING:
+
+            | a*cos(θ)  d*-sin(θ)  0.0 |
+            | a*sin(θ)  d*cos(θ)   0.0 |
+            | tx        ty         1.0 |
+
+            - technically when scaling with no rotation, you are still multiplying by cos(theta), but cos(0)
+            is one. Similarly, sin(0) is 0, but a 0 value of b and c means it makes no difference to the final
+            result of x' and y'
+
+        #### PERSPECTIVE
+
+            u, v, and w are all used for emulating 3D perpective (i.e. a slanted video)
+                - its unlikely these are ever used, so they're usually set to 0, 0, 1 respectively
+
+            perspective is emulated using the idea of homogenous coordinates
+                - has a format of (x, y, w)
+                - to convert from homogenous coordinates to 2D you divide x and y by w
+            u and v act as multipliers to x and y which is then summed with w
+                - so the final value in homogenous coordinates is (x, y, ux + vy + w)
+                - conversion to 2D is (x/(ux+vy+w), y/(ux+vy+w))
+
+        - for audio, matrixs dont apply and a default "identity matrix" is stated, with no transformation
+        | 1.0  0.0  0.0 |
+        | 0.0  1.0  0.0 |
+        | 0.0  0.0    1 |
+        - unlike the values of 1.0 for scale, which are literally 0x00010000 in hex, w holds an "identity
+        value" of 0x40000000
+
+mdia - Media Header
+    - seemingly just states media information is beginning
+
+mdhd - Media Header
+    - normal business of creation + modification time
+
+    - defines a personal timescale for the track. This does NOT make mvhd timescale obselete, because, for example, a mvhd
+    timescale of 600 at 5 seconds in is 3000 units. This 3000 units provides a global area to slot in corresponding tracks
+    to synchronise (i.e. an audio track and video track with 1000 and 48000 timescale respectively. Times both by 5 and recieve
+    5000 and 240000 respectively, units pointing to the place in those tracks you should take from; then slot these into the 6000
+    "pointer", a global area for tracks to synchronise). Personal timescales are required due to different file types requiring
+    different/finer timescales (i.e. audio timescale corresponds to sample rate, whilst video is frames. Audio needs finer timescales for accuracy also).
+
+    - contains media duration in personal timescale units
+
+    - contains a language code. (calculated by taking the ISO 639-2 three letter code, converting each letter to ASCII,
+    minusing 96, and converting to hex)
+
+    - final "predefined" area of 0x0000
+
+hdlr - Handler
+    ├── contain "component types" of usually either mhlr (media handler) or dhlr (data handler)
+    │
+    ├── mhlr - indicates handler handles media types (video, audio, text, hint tracks, metadata, etc)
+    ├── dhlr - indicates handler handles data references, either external or in the file (URLs, Macintosh aliases, URNs, etc)
+
+    -  component subtypes define the subtype that the handler handles. Three letter names show the specific type of data handled (i.e. video = vide, url = url, etc).
+
+    - ends in a final atom of a "component name" that provides a human readable informational name for the data handler, null terminated
+
+minf - Media Information
+    - seemingly just states *more* media information is beginning
+
+vmdh/smdh - Video/Sound Media Header
+VIDEO:
+    ├── contains a graphics mode, aka transfer mode, that can define how a video media is displayed
+    │
+    ├── normal: The video samples are displayed normally without any special blending or transparency effects. 0x0000
+    │
+    ├── dither Copy: The video samples are combined with other tracks using a dithering effect. 0x0001
+    │
+    ├── transparent: The video samples have transparency applied, allowing underlying tracks or backgrounds to show through. 0x4000
+    │
+    ├── add: The video samples are added to the background, typically used for effects like glowing or lighting. 0x0002
+
+    ├── Opcolor - defines colours in an rgb fashion that shall be used for the transfer mode
+    │
+    ├── normal: opcolor not used
+    │
+    ├── dither: opcolor is used to define the colour to blend the video with in a dithering effect
+    │
+    ├── transparent: opcolor is the colour to make transparent
+    │
+    ├── add: opcolor used to define what colour to add to video
+
+dinf - Data Information
+    - seemingly just states data information is beginning
+
+dref - Data Reference
+    - stores array of data references, such as URLs. Contains a "number of data entries" to state how many in arrays.
+    Multiple data entries can be used in many ways, but primarily used as: sequential access (simply play references
+    in order), adaptive switching (switch based on if the network rate is at a certain amount, as in switch to a
+    higher/lower quality data reference), or fallback (if access to one data reference fails, try the next). This is
+    a case-by-case and player-by-player basis that is not defined by the mp4 metadata. For example, MPEG-DASH or Apple
+    HLS have a playlist/manifest file to indicate availability of different bitrates. The media player uses the structure
+    and metadata within the MP4 file, along with external information (like manifests for adaptive streaming), to determine
+    how to handle multiple data references.
+
+    - URLs are stored as atoms
+
+    - the dref atom does not replace the mdat content. Instead, it provides references to where the media data can be found. If the media data is internal, the mdat atom contains the actual data, and the dref atom points to the mdat atom within the same file.
+
+    - if the media data is stored externally, the dref atom provides URLs or URNs pointing to the external location. The mdat atom might not be used in this case
+
+    - when initializing the video, the video player either fetches the track data from the mdat atom *or* the url. With internal data, the stbl atom offsets is used as normal (discussed later)
+
+### A LOT OF RELIANCE IS PUT ON THE PLAYER IN THIS SECTION. THE PLAYER MUST EITHER ASSUME A LOT OR SIFT THROUGH MANIFEST FILES
+### NOT SO MUCH WITH SEQUENTIAL ACCESS, BUT WITH ADAPTIVE SWITCHING IN PARTICULAR (and kind of fallback but not to such a high degree)
+
+stbl - Sample Table
+    - seemingly just states a sample table is beginning
+
+stsd - Sample Description - VIDEO
+    - provides global metadata for the all the track samples
+
+    - provides the an int32 number of sample description entries. Multiple sample descriptions sounds silly, but complex tracks in an mp4 might need this: as in some samples are H.264 and some are H.265. Or, for example, using different data references
+    in different samples and pointing to only a certain amount of samples in the track for each sample description.
+
+    - gives an int32 sample description size, how many bytes are in the sample description
+
+    - gives the data format of the media. Depending on the media, can be the actual media format or, more commonly, the compression
+    type (i.e. avc1). Followed by a reserved six bytes
+
+    - provides the point of access to data references for the samples with the data reference index, referring to
+    an index in the dref atom array.
+
+    - defines media height and width in pixels, and horizontal and vertical resolution (in PPI)
+
+    - defines frame count, how many frames are set per sample, commonly set to 1 because obviously but it doesn't HAVE to be.
+    This is technically based on QuickTime's "interesting time" idea for frames and samples do allow multiple frames, but
+    almost all modern MP4 workflows, sample = frame = decode unit
+
+    - a compressor name is stated, human readable name for the compressor, i.e. "AVC Coding"
+
+    - defines a bit depth for samples
+
+    - contains a sub-atom of a config box for the video codec, i.e. an avcC box (AVC Configuration)
+
+    stsd (Sample Description Box) - AVC VIDEO
+        - Reserved: 0x000000000000
+        - Data Reference Index: 1
+        - Pre-defined: 0x00000000000000000000000000000000
+        - Width: 1920
+        - Height: 1080
+        - Horizontal Resolution: 72 PPI
+        - Vertical Resolution: 72 PPI
+        - Reserved: 0x00000000
+        - Frame Count: 1
+        - Compressor Name: "AVC Coding"
+        - Depth: 24 bits
+        - Pre-defined: 0xFFFF
+        - avcC (AVC Configuration Box)
+            - Configuration Version: 1
+            - AVC Profile Indication: 0x64
+            - Profile Compatibility: 0x00
+            - AVC Level Indication: 0x1F
+            - Length Size Minus One: 0xFF
+            - SPS (Sequence Parameter Set)
+            - PPS (Picture Parameter Set)
+
+stsd - Sample Description - AUDIO
+    - follows the normal beginning of having two int32s for sample description for amount of sample descritions and sample description, along with the data format/codec and data reference index
+
+    - then proceeds into channel count - i.e. stereo has two channel counts, a left and right speaker
+
+    - contains a sample size followed by a reserved, an int16 stating how many bytes are contained in each audio sample. This is applicable for audio and not video because audio samples are always a set size as oppossed to video, which is not a set size
+    per frame. Instead, the stsz box defines the size of each video frame, how many there are, etc
+
+    - contains an audio sample rate followed by a reserved
+
+    - contains a similar sub-atom config box
+
+    mp4a (Audio Sample Entry Box) - AAC AUDIO
+        - Size: 104
+        - Type: 'mp4a'
+        - Reserved: 0x000000000000
+        - Data Reference Index: 1
+        - Reserved: 0x0000
+        - Reserved: 0x00000000
+        - Channel Count: 2 (stereo)
+        - Sample Size: 16 bits
+        - Pre-defined: 0x0000
+        - Sample Rate: 44100 (0x0000AC44)
+        - Reserved: 0x0000
+        - esds (Elementary Stream Descriptor Box)
+            - Version: 0
+            - Flags: 0
+            - ES Descriptor:
+            - AudioSpecificConfig:
+                - Object Type: AAC LC (Low Complexity)
+                - Sampling Frequency Index: 4 (44.1 kHz)
+                - Channel Configuration: 2 (stereo)
+
+stts - Time To Sample
+    - contains a "number of entries", stating how many entries in the time to sample table follow
+
+    - the tts table contains the amount of consecutive samples with the same sample duration, and then the sample duration, measured
+    in the tracks timescale
+
+stss - Sync Samples
+    - a video needs certain frames, keyframes or intra-coded frames (I-frames), that are full frames that require no subsequent or
+    previous frames to be decoded. The sync sample table states these keyframes identified by their index in the sequence of samples
+    with 1-based indexing
+
+    - P-frames (predictive frames) state the changes from the previous I-frame or P-frame, and  B-frames (bi-directional frames)
+    state the differences from the previous and subsequent frames. Instead of stating full images, only changes from the other
+    frames are stated. This causes a reliance on some I-frames for smooth playback and such.
+
+    - of course, contains a "number of entries" area
+
+    - NOT INCLUDED FOR AUDIO
+    - documentation stated stss atom has a "sample duration" but i think thats a load of crap
+
+stsc - Samples To Chunk
+    - effectively boxes the definition of samples away from themselves and instead identifies them in chunks. This helps with I/O
+    operations and memory. If you had to load a whole file a time it would be a massive pain to parse through and hold in mem. Or,
+    arguably worse, having to trawl through a list of every single sample offset.
+
+    - this is done via stating the chunk index (made more clear in the stco box), the number of samples in that chunk(s), and the
+    sample description that maps to that chunk(s)
+
+    - two entries of "{1, 4, 1}, {3, 1, 1}" indicates chunks 1-2 contain 4 samples each (so 8), whilst 3 onwards contain just one
+
+stsz - Sample Size
+    - contains an int32 sample size. If every sample in the track has the same size, this is used with no sample size table
+    needed. Else, it is set to 0
+
+    - states the number of entries in the sample size table
+
+    - contains a sample size table which is literally just a list of single track sample size (or doesnt appear in
+    the case of the sample size being non-0)
+
+stco - Chunk Offset
+    - really simple, states amount of entries, then contains a list of how many bytes into the mdat file each chunk is
+
+### METADATA
+
+iods - Initial Object Descriptors
+    - can basically be ignored. States general info for initialization but often not included in modern mp4s and decoders just get
+    their necessary info from the sub-atoms in trak or other.
+
+udta - User Data
+    - states user-defined metadata that is non-standard, like custo tags or personal annotations
+
+meta - Metadata
+    - states standardised metadata that is across formats, i.e. title, artist, etc
