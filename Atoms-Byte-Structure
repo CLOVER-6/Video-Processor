@@ -61,6 +61,22 @@ tkhd –
 4 bytes width (fixed-point)
 4 bytes height (fixed-point)
 
+edts –
+4 bytes size
+4 bytes 'edts'
+n bytes elst atom (only valid child)
+
+elst –
+4 bytes size
+4 bytes 'elst'
+1 byte version
+3 bytes flags
+4 bytes entry_count
+n x 4 bytes segment_duration      (in movie timescale from mvhd)
+n x 4 bytes media_time            (in media timescale from mdhd)
+n x 2 bytes media_rate_integer
+n x 2 bytes media_rate_fraction
+
 mdia –
 4 bytes size
 4 bytes 'mdia'
@@ -132,6 +148,15 @@ stbl –
 n bytes child boxes (stsd, stts, stss, stsc, stsz, stco)
 
 Inside stbl
+
+ctts –
+4 bytes size
+4 bytes 'ctts'
+1 byte version
+3 bytes flags
+4 bytes entry_count
+n x 4 bytes sample_count
+n x 4 bytes sample_offset
 
 stsd –
 4 bytes size

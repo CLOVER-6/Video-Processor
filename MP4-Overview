@@ -105,6 +105,8 @@ moov
   ├── mvhd
   ├── trak
   │   ├── tkhd
+  │   ├── edts
+  │   │   └── elst
   │   ├── mdia
   │   │   ├── mdhd
   │   │   ├── hdlr
@@ -112,16 +114,17 @@ moov
   │   │       ├── vmhd (for video track) or smhd (for audio track)
   │   │       ├── dinf
   │   │       ├── stbl
+  │   │           ├── ctts
   │   │           ├── stsd
   │   │           ├── stts
   │   │           ├── stss (for video track)
   │   │           ├── stsc
   │   │           ├── stsz
-  │   │           ├── stco
+  │   │           └── stco
   ├── trak (another track, same structure as above)
   ├── iods
   ├── udta
-  ├── meta
+  └── meta
 
 mvhd -> Movie Header
     - holds info on start time, duration, and time scale, creation and modification time of the moov header
@@ -223,6 +226,26 @@ tkhd - Track Header
         - unlike the values of 1.0 for scale, which are literally 0x00010000 in hex, w holds an "identity
         value" of 0x40000000
 
+edts - Edits
+    - container atom for edit list atom
+
+elst - Edit List
+    - contains entries with three fields: segment duration, media time, media rate
+    - segment duration = how long the edit lasts for in mvhd timescale (no edits = how long unedited section lasts)
+    - media time = where to begin reading samples in the track for the edit in mdhd timescale
+        - media time of -1 = dont play track media for the length of the segment duration
+    - media rate = divisor to segment duration (speed up or slow down)
+
+    Entry 0:
+    segment_duration = 6000 (6 sec in movie time)
+    media_time = 0      (start at beginning of media)
+    media_rate = 1.0    (normal speed)
+
+    Entry 1:
+    segment_duration = 2000
+    media_time = -1     → GAP of 2 seconds (silence)
+    media_rate = 1.0
+
 mdia - Media Header
     - seemingly just states media information is beginning
 
@@ -301,6 +324,35 @@ dref - Data Reference
 
 ### A LOT OF RELIANCE IS PUT ON THE PLAYER IN THIS SECTION. THE PLAYER MUST EITHER ASSUME A LOT OR SIFT THROUGH MANIFEST FILES
 ### NOT SO MUCH WITH SEQUENTIAL ACCESS, BUT WITH ADAPTIVE SWITCHING IN PARTICULAR (and kind of fallback but not to such a high degree)
+
+ctts - Composition Time to Sample
+    - provides an offset in mdhd timescale to delay display of certain samples
+
+    - primarily used for B frames, because they require two samples to be decoded correctly
+
+    - composition time = decode time + sample offset
+
+    stts must present samples and their duration in decodable order:
+    I, B (predicts from frame 0 and 2), P (predicts from frame 0)
+
+    but the track may want display as:
+    I, P, B
+
+    so offset allows this
+
+    EXAMPLE:
+
+    Entry 1: sample_count = 3, sample_offset = 0
+    Entry 2: sample_count = 2, sample_offset = 40
+    Entry 3: sample_count = 1, sample_offset = 80
+
+    Sample   #Offset    Display time = decode time + offset
+    1	     0	        decode time + 0
+    2	     0	        decode time + 0
+    3	     0	        decode time + 0
+    4	     40	        decode time + 40
+    5	     40	        decode time + 40
+    6	     80	        decode time + 80
 
 stbl - Sample Table
     - seemingly just states a sample table is beginning
