@@ -2,7 +2,7 @@ package com.jd.majors.mp4_processor.AtomClasses.Records;
 
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullAtom;
 
-public record StssAtom() implements FullAtom
+public record StssAtom(String name, int size, byte[] payload) implements FullAtom
 {
 
 }

@@ -2,7 +2,7 @@ package com.jd.majors.mp4_processor.AtomClasses.Records;
 
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.BasicAtom;
 
-public record MdatAtom() implements BasicAtom
+public record MdatAtom(String name, int size, byte[] payload) implements BasicAtom
 {
 
 }
