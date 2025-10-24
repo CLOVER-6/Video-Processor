@@ -1,4 +1,1 @@
-src/main/java/com/jd/majors/mp4_processor/AtomClasses/Records/CttsAtom.java 
-src/main/java/com/jd/majors/mp4_processor/AtomClasses/Records/EdtsAtom.java 
-src/main/java/com/jd/majors/mp4_processor/AtomClasses/Records/ElstAtom.java 
-src/main/java/com/jd/majors/mp4_processor/AtomClasses/Records/SkipAtom.java
+QuickScriptToGenerateClasses.py

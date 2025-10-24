@@ -1,5 +1,7 @@
 package com.jd.majors.mp4_processor.AtomClasses.Interfaces;
 
-public interface GeneralAtom {
-
+public sealed interface GeneralAtom permits ContainerAtom, FullAtom, BasicAtom
+{
+	String name();
+	int size();
 }
