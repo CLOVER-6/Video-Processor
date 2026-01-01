@@ -1,67 +1,234 @@
 package com.jd.majors.mp4_processor.AtomClasses.Classes;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.ContainerAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
-public class DrefAtom implements FullAtom 
+public class DrefAtom implements FullAtom, ContainerAtom, NestedAtom
 {
+	// can be url or urn, hence ur(x)
+	public class UrxAtom implements NestedAtom
+	{
+		private GeneralAtom parentAtom;
+		private final int size;
+		private final String name;
+		private final byte[] flags;
+		private final String urx;
+		
+		public UrxAtom(GeneralAtom parentAtom, int size, String name, byte[] flags, String urx)
+		{
+			this.parentAtom = parentAtom;
+			this.size = size;
+			this.name = name;
+			this.flags = flags;
+			this.urx = urx;
+		}
+
+		public GeneralAtom parentAtom() { return parentAtom; }
+		public int size() { return size; }
+		public String name() { return name; }
+		public byte[] flags() { return flags; }
+		public String urx() { return urx; }
+
+		public void setParent(GeneralAtom atom)
+		{
+			this.parentAtom = atom;
+		}
+		
+		@Override
+		public String toString() 
+		{
+			return "UrxAtom [size=" + size + ", name=" + name + ", flags=" + Arrays.toString(flags) + ", urx=" + urx
+					+ "]";
+		}
+
+		@Override
+		public int hashCode() 
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + getEnclosingInstance().hashCode();
+			result = prime * result + Arrays.hashCode(flags);
+			result = prime * result + Objects.hash(name, size, urx);
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) 
+		{
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			UrxAtom other = (UrxAtom) obj;
+			if (!getEnclosingInstance().equals(other.getEnclosingInstance()))
+				return false;
+			return Arrays.equals(flags, other.flags) && Objects.equals(name, other.name) && size == other.size
+					&& Objects.equals(urx, other.urx);
+		}
+
+		private DrefAtom getEnclosingInstance() 
+		{
+			return DrefAtom.this;
+		}	
+	}
+	// urx atom end
+	
+	private GeneralAtom parentAtom;
     private final int size;
     private final String name;
     private final short version;
     private final byte[] flags;
-    private final byte[] payload;
+    private int entryCount;
+    private List<GeneralAtom> dataReferences;
+    private byte[] payload;
 
-    public DrefAtom(int s, String n, short version, byte[] f, byte[] payload) 
+    public DrefAtom(GeneralAtom parentAtom, int size, String name, short version, byte[] flags, int entryCount, List<GeneralAtom> dataReferences) 
     {
+    	this.parentAtom = parentAtom;
+		this.size = size;
+		this.name = name;
+		this.version = version;
+		this.flags = flags;
+		this.entryCount = entryCount;
+		this.dataReferences = dataReferences;
+		// checking data references are all urx atoms
+		for (GeneralAtom atom : dataReferences)
+		{
+			if (!(atom instanceof UrxAtom))
+			{
+				throw new IllegalArgumentException();
+			}
+		}
+		this.payload = null;
+	}
+
+	public DrefAtom(int s, String n, short version, byte[] f, byte[] payload) 
+    {
+		this.parentAtom = null;
         this.size = s;
         this.name = n;
         this.version = version;
         this.flags = f;
+        this.entryCount = 0;
+        this.dataReferences = null;
         this.payload = payload;
     }
 
-    public DrefAtom(int s, String n, byte[] payload) {
+    public DrefAtom(int s, String n, byte[] payload) 
+    {
+    	this.parentAtom = null;
         this.size = s;
         this.name = n;
         this.version = payload[0];
         this.flags = Arrays.copyOfRange(payload, 1, 4);
-        this.payload = Arrays.copyOfRange(payload, 5, payload.length);
+        this.entryCount = 0;
+        this.dataReferences = null;
+        this.payload = Arrays.copyOfRange(payload, 4, payload.length);
     }
 
-    // TODO fill this out
-    public GeneralAtom parse() 
+    // atm, this being public is an issue because urls are contained and set in file
+    // but, i am extending this to be writing mp4s too in future
+    public void addAtom(NestedAtom atom)
     {
-    	return null;
+    	if (!(atom instanceof UrxAtom)) 
+    	{
+    		throw new IllegalArgumentException();
+    	}
+    	
+    	atom.setParent(atom);
+    	dataReferences.add(atom);
     }
     
+    public void parse() throws Exception
+    {
+    	if (payload == null)
+    	{
+    		throw new Exception("Empty Payload - Cannot parse");
+    	}
+    	
+    	int eightMultiple = 3;
+    	for (int i = 0; i < 4; i++)
+    	{
+    		entryCount = entryCount | (payload[i] & 0xFF) << 8 * eightMultiple;
+    		eightMultiple = eightMultiple - 1;
+    	}
+
+    	int urxSize = 0;
+    	String urxName = "";
+    	byte[] urxFlags = new byte[4];
+    	String urxUrx = "";
+    	
+    	int atomOffset = 4;
+    	for (int i = 0; i < entryCount; i++)
+    	{
+    		eightMultiple = 3;
+    		for (int j = atomOffset; j < atomOffset + 4; j++)
+    		{
+    			urxSize = urxSize | (payload[j] & 0xFF) << 8 * eightMultiple;
+    			eightMultiple = eightMultiple - 1;
+    		}
+    		
+    		urxName = new String(Arrays.copyOfRange(payload, atomOffset + 4, atomOffset + 8));
+    		urxFlags = Arrays.copyOfRange(payload, atomOffset + 8, atomOffset + 12);	
+    		urxUrx = new String(Arrays.copyOfRange(payload, atomOffset + 12, atomOffset + urxSize));
+    		
+    		this.addAtom(new UrxAtom(this, urxSize, urxName, urxFlags, urxUrx));
+    		
+    		atomOffset = atomOffset + urxSize;
+    	}
+    	
+    	payload = null;
+    }
+
+    public GeneralAtom parentAtom() { return parentAtom; } 
     public int size() { return size; }
     public String name() { return name; }
     public short version() { return version; }
     public byte[] flags() { return flags; }
+    public int entryCount() { return entryCount; }
+    public List<GeneralAtom> childAtoms() { return dataReferences; }
     public byte[] payload() { return payload; }
-
-    @Override
-    public String toString() 
+	
+    public void setParent(GeneralAtom atom)
     {
-        return "DrefAtom [size=" + size + ", name=" + name + ", version=" + version +
-               ", flags=" + flags + ", payloadLength=" + (payload != null ? payload.length : 0) + "]";
+    	this.parentAtom = atom;
     }
+    
+	@Override
+	public String toString() {
+		return "DrefAtom [parentAtom=" + parentAtom + ", size=" + size + ", name=" + name + ", version=" + version
+				+ ", flags=" + Arrays.toString(flags) + ", entryCount=" + entryCount + ", dataReferences="
+				+ dataReferences + "]";
+	}
 
-    @Override
-    public int hashCode() 
-    {
-        return Objects.hash(size, name, version, Arrays.hashCode(flags), java.util.Arrays.hashCode(payload));
-    }
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(flags);
+		result = prime * result + Objects.hash(dataReferences, entryCount, name, parentAtom, size, version);
+		return result;
+	}
 
-    @Override
-    public boolean equals(Object obj) 
-    {
-        if (this == obj) return true;
-        if (!(obj instanceof DrefAtom)) return false;
-        DrefAtom other = (DrefAtom) obj;
-        return size == other.size && version == other.version && Arrays.equals(flags, other.flags)
-            && Objects.equals(name, other.name) && java.util.Arrays.equals(payload, other.payload);
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DrefAtom other = (DrefAtom) obj;
+		return Objects.equals(dataReferences, other.dataReferences) && entryCount == other.entryCount
+				&& Arrays.equals(flags, other.flags) && Objects.equals(name, other.name)
+				&& Objects.equals(parentAtom, other.parentAtom) && size == other.size && version == other.version;
+	}
 }

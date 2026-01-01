@@ -72,10 +72,11 @@ elst –
 1 byte version
 3 bytes flags
 4 bytes entry_count
-n x 4 bytes segment_duration      (in movie timescale from mvhd)
-n x 4 bytes media_time            (in media timescale from mdhd)
-n x 2 bytes media_rate_integer
-n x 2 bytes media_rate_fraction
+n x 12 bytes entry:
+    4 bytes segment_duration      (in movie timescale from mvhd)
+    4 bytes media_time            (in media timescale from mdhd)
+    2 bytes media_rate_integer
+    2 bytes media_rate_fraction
 
 mdia –
 4 bytes size

@@ -4,17 +4,20 @@ import java.util.Arrays;
 import java.util.Objects;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
-public class StcoAtom implements FullAtom 
+public class StcoAtom implements FullAtom, NestedAtom
 {
+	private GeneralAtom parentAtom;
     private final int size;
     private final String name;
     private final short version;
     private final byte[] flags;
     private final byte[] payload;
 
-    public StcoAtom(int s, String n, short version, byte[] f, byte[] payload) 
+    public StcoAtom(GeneralAtom parentAtom, int s, String n, short version, byte[] f, byte[] payload) 
     {
+    	this.parentAtom =  parentAtom;
         this.size = s;
         this.name = n;
         this.version = version;
@@ -24,6 +27,7 @@ public class StcoAtom implements FullAtom
 
     public StcoAtom(int s, String n, byte[] payload) 
     {
+    	this.parentAtom = null;
         this.size = s;
         this.name = n;
         this.version = payload[0];
@@ -32,17 +36,23 @@ public class StcoAtom implements FullAtom
     }
 
     // TODO fill this out
-    public GeneralAtom parse() 
+    public void parse() 
     {
-    	return null;
+
     }
     
+    public GeneralAtom parentAtom() { return parentAtom; }
     public int size() { return size; }
     public String name() { return name; }
     public short version() { return version; }
     public byte[] flags() { return flags; }
     public byte[] payload() { return payload; }
 
+    public void setParent(GeneralAtom atom)
+    {
+    	this.parentAtom = atom;
+    }
+    
     @Override
     public String toString() 
     {

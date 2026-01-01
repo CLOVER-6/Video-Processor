@@ -3,11 +3,6 @@ package com.jd.majors.mp4_processor.Parsing;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.*;
 import com.jd.majors.mp4_processor.AtomClasses.Classes.*;
 
-import java.io.IOException;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 

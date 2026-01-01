@@ -2,9 +2,9 @@ package com.jd.majors.mp4_processor.AtomClasses.Classes;
 
 import java.util.Objects;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.BasicAtom;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.TopLevelAtom;
 
-public class SkipAtom implements BasicAtom 
+public class SkipAtom implements BasicAtom, TopLevelAtom
 {
     private final int size;
     private final String name;
@@ -18,9 +18,8 @@ public class SkipAtom implements BasicAtom
     }
     
     // TODO fill this out
-    public GeneralAtom parse() 
+    public void parse() 
     {
-    	return null;
     }
 
     public int size() { return size; }

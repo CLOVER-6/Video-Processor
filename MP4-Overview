@@ -113,6 +113,7 @@ moov
   │   │   ├── minf
   │   │       ├── vmhd (for video track) or smhd (for audio track)
   │   │       ├── dinf
+  │   │       ├── dref
   │   │       ├── stbl
   │   │           ├── ctts
   │   │           ├── stsd
@@ -234,6 +235,9 @@ elst - Edit List
     - segment duration = how long the edit lasts for in mvhd timescale (no edits = how long unedited section lasts)
     - media time = where to begin reading samples in the track for the edit in mdhd timescale
         - media time of -1 = dont play track media for the length of the segment duration
+        - media time can be use for decoder synchronisation with audio. AAC often uses a media time of 1024 in the case
+        of continous playback (no edits, one entry of entire video duration) to begin playback past samples of silence,
+        or other.
     - media rate = divisor to segment duration (speed up or slow down)
 
     Entry 0:
@@ -333,10 +337,10 @@ ctts - Composition Time to Sample
     - composition time = decode time + sample offset
 
     stts must present samples and their duration in decodable order:
-    I, B (predicts from frame 0 and 2), P (predicts from frame 0)
+    I, P (predicts from frame 0), B (predicts from frame 0 and 2)
 
     but the track may want display as:
-    I, P, B
+    I, B, P
 
     so offset allows this
 
@@ -360,7 +364,7 @@ stbl - Sample Table
 stsd - Sample Description - VIDEO
     - provides global metadata for the all the track samples
 
-    - provides the an int32 number of sample description entries. Multiple sample descriptions sounds silly, but complex tracks in an mp4 might need this: as in some samples are H.264 and some are H.265. Or, for example, using different data references
+    - provides an int32 number of sample description entries. Multiple sample descriptions sounds silly, but complex tracks in an mp4 might need this: as in some samples are H.264 and some are H.265. Or, for example, using different data references
     in different samples and pointing to only a certain amount of samples in the track for each sample description.
 
     - gives an int32 sample description size, how many bytes are in the sample description
@@ -383,27 +387,31 @@ stsd - Sample Description - VIDEO
 
     - contains a sub-atom of a config box for the video codec, i.e. an avcC box (AVC Configuration)
 
-    stsd (Sample Description Box) - AVC VIDEO
-        - Reserved: 0x000000000000
-        - Data Reference Index: 1
-        - Pre-defined: 0x00000000000000000000000000000000
-        - Width: 1920
-        - Height: 1080
-        - Horizontal Resolution: 72 PPI
-        - Vertical Resolution: 72 PPI
-        - Reserved: 0x00000000
-        - Frame Count: 1
-        - Compressor Name: "AVC Coding"
-        - Depth: 24 bits
-        - Pre-defined: 0xFFFF
-        - avcC (AVC Configuration Box)
-            - Configuration Version: 1
-            - AVC Profile Indication: 0x64
-            - Profile Compatibility: 0x00
-            - AVC Level Indication: 0x1F
-            - Length Size Minus One: 0xFF
-            - SPS (Sequence Parameter Set)
-            - PPS (Picture Parameter Set)
+    stsd (Sample Description Box) - AVC
+    └─ sample_entry (e.g., 'avc1')
+      ├─ reserved (6 bytes = 0)
+      ├─ data_reference_index (2 bytes)
+      ├─ pre_defined (2 bytes = 0)
+      ├─ reserved (2 bytes = 0)
+      ├─ pre_defined[3] (12 bytes = 0)
+      ├─ width (2 bytes)
+      ├─ height (2 bytes)
+      ├─ horizresolution (4 bytes = 0x00480000)
+      ├─ vertresolution (4 bytes = 0x00480000)
+      ├─ reserved (4 bytes = 0)
+      ├─ frame_count (2 bytes = 1)
+      ├─ compressorname (32 bytes, Pascal string)
+      ├─ depth (2 bytes = 0x0018)
+      ├─ pre_defined (2 bytes = 0xFFFF)
+      └─ contained atoms:
+            ├─  avcC (AVC Configuration Box)
+                - Configuration Version: 1
+                - AVC Profile Indication: 0x64
+                - Profile Compatibility: 0x00
+                - AVC Level Indication: 0x1F
+                - Length Size Minus One: 0xFF
+                - SPS (Sequence Parameter Set)
+                - PPS (Picture Parameter Set)
 
 stsd - Sample Description - AUDIO
     - follows the normal beginning of having two int32s for sample description for amount of sample descritions and sample description, along with the data format/codec and data reference index
