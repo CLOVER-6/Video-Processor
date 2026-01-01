@@ -1,0 +1,100 @@
+🎬 What SPS and PPS Are
+
+In H.264 (AVC), the raw video stream is made up of NAL units (Network Abstraction Layer units).
+Each NAL unit has a type, like:
+
+NAL Unit Type	Meaning
+1	Coded slice of a non-IDR picture
+5	Coded slice of an IDR (key) picture
+7	Sequence Parameter Set (SPS)
+8	Picture Parameter Set (PPS)
+These are the "metadata" that describe how to decode the actual compressed video frames.
+
+🧩 Sequence Parameter Set (SPS)
+
+The SPS defines global parameters for a whole sequence of frames — think of it as describing how the entire video stream is encoded.
+
+It tells the decoder things like:
+
+Profile and Level (e.g., Baseline, Main, High, Level 4.1)
+
+Frame width and height
+
+Chroma format (4:2:0, 4:2:2, etc.)
+
+Bit depth
+
+Frame timing information (frame rate, interlaced/progressive)
+
+Reference frame count
+
+Aspect ratio
+
+Constraints and capabilities
+
+Without the SPS, the decoder wouldn’t know how to interpret the binary structure of the frames that follow.
+
+You can think of SPS as a “global config header” for the stream.
+
+🧱 Picture Parameter Set (PPS)
+
+The PPS defines parameters that apply to one or more pictures (frames) — it’s a layer below the SPS.
+
+It controls:
+
+Entropy coding mode (CAVLC vs CABAC)
+
+Quantization parameters (QP offsets, scaling lists)
+
+Deblocking filter settings
+
+Reference picture list behavior
+
+You can have multiple PPSs referring to the same SPS.
+For example, one PPS might specify CABAC entropy coding, and another might specify CAVLC — both can use the same SPS.
+
+Think of PPS as a "local config" for how to decode a specific group of pictures.
+
+⚙️ Relationship Between SPS, PPS, and Frames
+
+Here’s the hierarchy:
+SPS (sequence-level info)
+ └─ PPS (picture-level info)
+      └─ Frames (actual coded slices)
+
+When the decoder sees a video frame (NAL type 1 or 5), the slice header references a pps_id, and the PPS in turn references an sps_id.
+So the decoder can look up all the needed context before decoding that frame.
+
+🧠 Why They’re in avcC
+
+In MP4 containers, SPS and PPS are stored separately in the avcC atom (AVCDecoderConfigurationRecord).
+That’s because MP4 samples only store raw frame data (slice NAL units), and the decoder still needs SPS/PPS to initialize.
+
+So when you use a decoder (like Android’s MediaCodec), you typically feed:
+
+csd-0 = SPS data (from avcC)
+
+csd-1 = PPS data (from avcC)
+
+before sending any actual frames.
+
+🧮 Example
+
+An example NAL header and types:
+00 00 00 01 67 64 00 1F AC D9 40 78 ...  ← SPS (NAL type 7)
+00 00 00 01 68 EE 06 F2 C0             ← PPS (NAL type 8)
+00 00 00 01 65 88 84 ...                ← IDR (keyframe)
+
+Here:
+
+0x67 = 0b01100111 → NAL type 7 → SPS
+
+0x68 = 0b01101000 → NAL type 8 → PPS
+
+0x65 = 0b01100101 → NAL type 5 → IDR frame
+
+🧩 Quick Analogy
+Concept	Real-world analogy
+SPS	Blueprint for the entire building (video stream)
+PPS	Settings for a specific floor (frame group)
+Slice/frame	Actual content in each room (video data)
