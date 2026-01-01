@@ -10,6 +10,7 @@ public class AtomRegistry
 {
 	private static final Map<String, AtomFactory> registry = new HashMap<String, AtomFactory>();
 	
+	// put new atom in registry, along with those given at compile time
 	public static void registerAtom(String atomName, AtomFactory atomFactory)
 	{
 		if (!registry.containsKey(atomName))
@@ -22,6 +23,7 @@ public class AtomRegistry
 		}
 	}
 	
+	// give atom to user
 	public static GeneralAtom createAtom(int size, String name, byte[] payload)
 	{
 		AtomFactory atomFactory = registry.get(name);
