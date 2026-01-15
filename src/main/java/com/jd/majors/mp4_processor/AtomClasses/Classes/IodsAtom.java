@@ -37,9 +37,9 @@ public class IodsAtom implements FullAtom, NestedAtom
     }
     
     // TODO fill this out
-    public void parse() 
+    public IodsAtom parse() 
     {
-
+    	return this;
     }
 
     public GeneralAtom parentAtom() { return parentAtom; }

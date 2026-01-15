@@ -36,10 +36,9 @@ public class Co64Atom implements FullAtom, NestedAtom
     }
 
     // TODO fill this out
-    public void parse() 
+    public Co64Atom parse() 
     {
-
-
+    	return this;
     }
     
     public GeneralAtom parentAtom() { return parentAtom; }

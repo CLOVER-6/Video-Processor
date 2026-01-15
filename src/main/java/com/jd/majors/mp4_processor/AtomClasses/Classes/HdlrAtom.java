@@ -55,7 +55,7 @@ public class HdlrAtom implements FullAtom, NestedAtom
     }
     
     // TODO fill this out
-    public void parse() throws Exception 
+    public HdlrAtom parse() throws Exception 
     {
     	if (payload == null)
     	{
@@ -73,6 +73,8 @@ public class HdlrAtom implements FullAtom, NestedAtom
     	handlerName = new String(Arrays.copyOfRange(payload, 20, payloadPointer));
     	
     	payload = null;
+    	
+    	return this;
     }
 
     public GeneralAtom parentAtom() { return parentAtom; }

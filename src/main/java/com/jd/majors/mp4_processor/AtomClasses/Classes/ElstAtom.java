@@ -54,7 +54,7 @@ public class ElstAtom implements FullAtom, NestedAtom
         this.payload = Arrays.copyOfRange(payload, 4, payload.length);
     }
     
-    public void parse() throws Exception
+    public ElstAtom parse() throws Exception
     {
     	if (payload == null)
     	{
@@ -109,6 +109,8 @@ public class ElstAtom implements FullAtom, NestedAtom
         	
         	entriesPointer = entriesPointer + 1;
         }
+        
+        return this;
     }
 
     public GeneralAtom parentAtom() { return parentAtom; }

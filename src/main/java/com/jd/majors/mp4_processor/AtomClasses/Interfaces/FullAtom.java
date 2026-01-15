@@ -4,5 +4,5 @@ public non-sealed interface FullAtom extends GeneralAtom
 {
 	short version(); 
 	byte[] flags();
-	void parse() throws Exception;
+	FullAtom parse() throws Exception;
 }

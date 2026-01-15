@@ -36,9 +36,9 @@ public class StszAtom implements FullAtom, NestedAtom
     }
     
     // TODO fill this out
-    public void parse() 
+    public StszAtom parse() 
     {
-
+    	return this;
     }
 
     public GeneralAtom parentAtom() { return parentAtom; }

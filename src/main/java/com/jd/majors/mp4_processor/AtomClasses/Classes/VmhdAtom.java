@@ -54,7 +54,7 @@ public class VmhdAtom implements FullAtom, NestedAtom
     }
     
     // TODO fill this out
-    public void parse() throws Exception
+    public VmhdAtom parse() throws Exception
     {
     	if (payload == null)
     	{
@@ -68,6 +68,8 @@ public class VmhdAtom implements FullAtom, NestedAtom
     	opcolours[2] = (short) ((payload[6] & 0xFF) << 8 | payload[7] & 0xFF);
     	
     	payload = null;
+    	
+    	return this;
     }
 
     public GeneralAtom parentAtom() { return parentAtom; }
