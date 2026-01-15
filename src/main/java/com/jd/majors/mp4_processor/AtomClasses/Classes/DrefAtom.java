@@ -8,6 +8,7 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.ContainerAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
+import com.jd.majors.mp4_processor.Parsing.AtomRegistry;
 
 public class DrefAtom implements FullAtom, ContainerAtom, NestedAtom
 {
@@ -109,7 +110,8 @@ public class DrefAtom implements FullAtom, ContainerAtom, NestedAtom
     		urxName = new String(Arrays.copyOfRange(payload, atomOffset + 4, atomOffset + 8));
     		urxPayload = Arrays.copyOfRange(payload, atomOffset + 8, atomOffset + urxSize);
     		
-    		urxAtom = new UrxAtom(urxSize, urxName, urxPayload).parse();
+    		urxAtom = (UrxAtom) AtomRegistry.createAtom(urxSize, urxName, urxPayload);
+    		urxAtom = urxAtom.parse();
     		urxAtom.setParent(this);
     		this.addAtom(urxAtom);
     		
