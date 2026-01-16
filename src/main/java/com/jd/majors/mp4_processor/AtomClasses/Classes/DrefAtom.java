@@ -8,79 +8,10 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.ContainerAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
+import com.jd.majors.mp4_processor.Parsing.AtomRegistry;
 
 public class DrefAtom implements FullAtom, ContainerAtom, NestedAtom
 {
-	// can be url or urn, hence ur(x)
-	public class UrxAtom implements NestedAtom
-	{
-		private GeneralAtom parentAtom;
-		private final int size;
-		private final String name;
-		private final byte[] flags;
-		private final String urx;
-		
-		public UrxAtom(GeneralAtom parentAtom, int size, String name, byte[] flags, String urx)
-		{
-			this.parentAtom = parentAtom;
-			this.size = size;
-			this.name = name;
-			this.flags = flags;
-			this.urx = urx;
-		}
-
-		public GeneralAtom parentAtom() { return parentAtom; }
-		public int size() { return size; }
-		public String name() { return name; }
-		public byte[] flags() { return flags; }
-		public String urx() { return urx; }
-
-		public void setParent(GeneralAtom atom)
-		{
-			this.parentAtom = atom;
-		}
-		
-		@Override
-		public String toString() 
-		{
-			return "UrxAtom [size=" + size + ", name=" + name + ", flags=" + Arrays.toString(flags) + ", urx=" + urx
-					+ "]";
-		}
-
-		@Override
-		public int hashCode() 
-		{
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + getEnclosingInstance().hashCode();
-			result = prime * result + Arrays.hashCode(flags);
-			result = prime * result + Objects.hash(name, size, urx);
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) 
-		{
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			UrxAtom other = (UrxAtom) obj;
-			if (!getEnclosingInstance().equals(other.getEnclosingInstance()))
-				return false;
-			return Arrays.equals(flags, other.flags) && Objects.equals(name, other.name) && size == other.size
-					&& Objects.equals(urx, other.urx);
-		}
-
-		private DrefAtom getEnclosingInstance() 
-		{
-			return DrefAtom.this;
-		}	
-	}
-	// urx atom end
-	
 	private GeneralAtom parentAtom;
     private final int size;
     private final String name;
@@ -147,7 +78,7 @@ public class DrefAtom implements FullAtom, ContainerAtom, NestedAtom
     	dataReferences.add(atom);
     }
     
-    public void parse() throws Exception
+    public DrefAtom parse() throws Exception
     {
     	if (payload == null)
     	{
@@ -163,8 +94,8 @@ public class DrefAtom implements FullAtom, ContainerAtom, NestedAtom
 
     	int urxSize = 0;
     	String urxName = "";
-    	byte[] urxFlags = new byte[4];
-    	String urxUrx = "";
+    	byte[] urxPayload = null;
+    	UrxAtom urxAtom = null;
     	
     	int atomOffset = 4;
     	for (int i = 0; i < entryCount; i++)
@@ -177,15 +108,19 @@ public class DrefAtom implements FullAtom, ContainerAtom, NestedAtom
     		}
     		
     		urxName = new String(Arrays.copyOfRange(payload, atomOffset + 4, atomOffset + 8));
-    		urxFlags = Arrays.copyOfRange(payload, atomOffset + 8, atomOffset + 12);	
-    		urxUrx = new String(Arrays.copyOfRange(payload, atomOffset + 12, atomOffset + urxSize));
+    		urxPayload = Arrays.copyOfRange(payload, atomOffset + 8, atomOffset + urxSize);
     		
-    		this.addAtom(new UrxAtom(this, urxSize, urxName, urxFlags, urxUrx));
+    		urxAtom = (UrxAtom) AtomRegistry.createAtom(urxSize, urxName, urxPayload);
+    		urxAtom = urxAtom.parse();
+    		urxAtom.setParent(this);
+    		this.addAtom(urxAtom);
     		
     		atomOffset = atomOffset + urxSize;
     	}
     	
     	payload = null;
+    	
+    	return this;
     }
 
     public GeneralAtom parentAtom() { return parentAtom; } 

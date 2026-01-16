@@ -54,7 +54,7 @@ public class CttsAtom implements FullAtom, NestedAtom
         this.payload = Arrays.copyOfRange(payload, 4, payload.length);
     }
     
-    public void parse() throws Exception
+    public CttsAtom parse() throws Exception
     {
     	if (payload == null)
     	{
@@ -91,6 +91,8 @@ public class CttsAtom implements FullAtom, NestedAtom
     	}
     	
     	payload = null;
+    	
+    	return this;
     }
 
     public GeneralAtom parentAtom() { return parentAtom; }

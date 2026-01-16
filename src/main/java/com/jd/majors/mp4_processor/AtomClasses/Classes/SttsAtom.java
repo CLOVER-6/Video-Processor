@@ -36,9 +36,9 @@ public class SttsAtom implements FullAtom, NestedAtom
     }
 
     // TODO fill this out
-    public void parse() 
+    public SttsAtom parse() 
     {
-
+    	return this;
     }
     
     public GeneralAtom parentAtom() { return parentAtom; }

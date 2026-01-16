@@ -66,7 +66,7 @@ public class MdhdAtom implements FullAtom, NestedAtom
         this.payload = Arrays.copyOfRange(payload, 4, payload.length);
     }
     
-    public void parse() throws Exception
+    public MdhdAtom parse() throws Exception
     {
     	if (payload == null)
     	{
@@ -121,6 +121,8 @@ public class MdhdAtom implements FullAtom, NestedAtom
     	
     	// dont allow atom to be parsed multiple times
     	payload = null;
+    	
+    	return this;
     }
 
     public GeneralAtom parentAtom() { return parentAtom; }

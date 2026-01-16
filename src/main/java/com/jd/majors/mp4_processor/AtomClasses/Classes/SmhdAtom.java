@@ -36,9 +36,9 @@ public class SmhdAtom implements FullAtom, NestedAtom
     }
 
     // TODO fill this out
-    public void parse() 
+    public SmhdAtom parse() 
     {
- 
+    	return this;
     }	
     
     public GeneralAtom parentAtom() { return parentAtom; }
