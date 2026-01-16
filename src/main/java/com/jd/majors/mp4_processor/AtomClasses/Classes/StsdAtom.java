@@ -66,16 +66,18 @@ public class StsdAtom implements FullAtom, NestedAtom, ContainerAtom
     private final String name;
     private final short version;
     private final byte[] flags;
-    private final byte[] payload;
+    private int entryCount;
     private final List<GeneralAtom> sampleDescs;
+    private final byte[] payload;
 
-    public StsdAtom(GeneralAtom parentAtom, int s, String n, short version, byte[] f, byte[] payload, List<GeneralAtom> sampleDescs) 
+    public StsdAtom(GeneralAtom parentAtom, int s, String n, short version, byte[] f, int entryCount, List<GeneralAtom> sampleDescs) 
     {
     	this.parentAtom = parentAtom;
         this.size = s;
         this.name = n;
         this.version = version;
         this.flags = f;
+        this.entryCount = entryCount;
         this.sampleDescs = sampleDescs;
         // not allowing instantiation with other types
         for (GeneralAtom sampleDesc : sampleDescs)
@@ -85,9 +87,22 @@ public class StsdAtom implements FullAtom, NestedAtom, ContainerAtom
         		throw new IllegalArgumentException();
         	}
         }
-        this.payload = payload;
+        this.payload = null;
     }
 
+    public StsdAtom(int s, String n, short version, byte[] f, byte[] payload) 
+    {
+    	this.parentAtom = null;
+        this.size = s;
+        this.name = n;
+        this.version = version;
+        this.flags = f;
+        this.entryCount = 0;
+        this.sampleDescs = new ArrayList<GeneralAtom>();
+        this.payload = payload;
+
+    }
+    
     public StsdAtom(int s, String n, byte[] payload) 
     {
     	this.parentAtom = null;
@@ -95,6 +110,7 @@ public class StsdAtom implements FullAtom, NestedAtom, ContainerAtom
         this.name = n;
         this.version = payload[0];
         this.flags = Arrays.copyOfRange(payload, 1, 4);
+        this.entryCount = 0;
         this.sampleDescs = new ArrayList<GeneralAtom>();
         this.payload = Arrays.copyOfRange(payload, 5, payload.length);
     }
@@ -122,34 +138,44 @@ public class StsdAtom implements FullAtom, NestedAtom, ContainerAtom
     public String name() { return name; }
     public short version() { return version; }
     public byte[] flags() { return flags; }
-    public byte[] payload() { return payload; }
+    public int entryCount() { return entryCount; }
     public List<GeneralAtom> childAtoms() { return sampleDescs; }
+    public byte[] payload() { return payload; }
     
     public void setParent(GeneralAtom atom)
     {
     	this.parentAtom = atom;
     }
+
+	@Override
+	public String toString() {
+		return "StsdAtom [parentAtom=" + parentAtom + ", size=" + size + ", name=" + name + ", version=" + version
+				+ ", flags=" + Arrays.toString(flags) + ", entryCount=" + entryCount + ", sampleDescs=" + sampleDescs
+				+ "]";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(flags);
+		result = prime * result + Objects.hash(entryCount, name, parentAtom, sampleDescs, size, version);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		StsdAtom other = (StsdAtom) obj;
+		return entryCount == other.entryCount && Arrays.equals(flags, other.flags) && Objects.equals(name, other.name)
+				&& Objects.equals(parentAtom, other.parentAtom) && Objects.equals(sampleDescs, other.sampleDescs)
+				&& size == other.size && version == other.version;
+	}
     
-    @Override
-    public String toString() 
-    {
-        return "StsdAtom [size=" + size + ", name=" + name + ", version=" + version +
-               ", flags=" + flags + ", payloadLength=" + (payload != null ? payload.length : 0) + "]";
-    }
-
-    @Override
-    public int hashCode() 
-    {
-        return Objects.hash(size, name, version, Arrays.hashCode(flags), java.util.Arrays.hashCode(payload));
-    }
-
-    @Override
-    public boolean equals(Object obj) 
-    {
-        if (this == obj) return true;
-        if (!(obj instanceof StsdAtom)) return false;
-        StsdAtom other = (StsdAtom) obj;
-        return size == other.size && version == other.version && Arrays.equals(flags, other.flags)
-            && Objects.equals(name, other.name) && java.util.Arrays.equals(payload, other.payload);
-    }
+    
 }
