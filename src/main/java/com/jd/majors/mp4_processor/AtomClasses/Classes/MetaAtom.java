@@ -14,9 +14,9 @@ public class MetaAtom implements ContainerAtom, NestedAtom
     private final String name;
     private final List<GeneralAtom> childAtoms;
 
-    public MetaAtom(GeneralAtom parentAtom, int size, String name, List<GeneralAtom> childAtoms) 
+    public MetaAtom(int size, String name, List<GeneralAtom> childAtoms) 
     {
-        this.parentAtom = parentAtom;
+        this.parentAtom = null;
     	this.size = size;
         this.name = name;
         this.childAtoms = childAtoms;
@@ -47,17 +47,20 @@ public class MetaAtom implements ContainerAtom, NestedAtom
     }
     
     @Override
-    public String toString() {
+    public String toString() 
+    {
         return "MetaAtom [size=" + size + ", name=" + name + ", childAtoms=" + childAtoms + "]";
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode() 
+    {
         return Objects.hash(size, name, childAtoms);
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(Object obj) 
+    {
         if (this == obj) return true;
         if (!(obj instanceof MetaAtom)) return false;
         MetaAtom other = (MetaAtom) obj;

@@ -49,12 +49,12 @@ public class UdtaAtom implements ContainerAtom, NestedAtom
     
     @Override
     public String toString() {
-        return "UdtaAtom [size=" + size + ", name=" + name + ", childAtoms=" + childAtoms + "]";
+        return "UdtaAtom [parentAtom=" + parentAtom + ", size=" + size + ", name=" + name + ", childAtoms=" + childAtoms + "]";
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(size, name, childAtoms);
+        return Objects.hash(parentAtom, size, name, childAtoms);
     }
 
     @Override
@@ -63,6 +63,6 @@ public class UdtaAtom implements ContainerAtom, NestedAtom
         if (!(obj instanceof UdtaAtom)) return false;
         UdtaAtom other = (UdtaAtom) obj;
         return size == other.size && Objects.equals(name, other.name) &&
-               Objects.equals(childAtoms, other.childAtoms);
+               Objects.equals(childAtoms, other.childAtoms) && Objects.equals(parentAtom, other.parentAtom);
     }
 }

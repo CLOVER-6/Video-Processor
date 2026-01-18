@@ -10,6 +10,14 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 import com.jd.majors.mp4_processor.Parsing.AtomRegistry;
 
+/**
+ * Data reference atom (dref).
+ *
+ * Notes:
+ * - Contains references to other data atoms (url/urn boxes).
+ * - Parses children using `AtomRegistry.createAtom` and integrates them into the tree.
+ * - Payload is cleared after parsing to prevent re-parsing.
+ */
 public class DrefAtom implements FullAtom, ContainerAtom, NestedAtom
 {
 	private GeneralAtom parentAtom;
@@ -30,14 +38,6 @@ public class DrefAtom implements FullAtom, ContainerAtom, NestedAtom
 		this.flags = flags;
 		this.entryCount = entryCount;
 		this.dataReferences = dataReferences;
-		// checking data references are all urx atoms
-		for (GeneralAtom atom : dataReferences)
-		{
-			if (!(atom instanceof UrxAtom))
-			{
-				throw new IllegalArgumentException();
-			}
-		}
 		this.payload = null;
 	}
 
@@ -74,7 +74,7 @@ public class DrefAtom implements FullAtom, ContainerAtom, NestedAtom
     		throw new IllegalArgumentException();
     	}
     	
-    	atom.setParent(atom);
+    	atom.setParent(this);
     	dataReferences.add(atom);
     }
     
@@ -92,30 +92,39 @@ public class DrefAtom implements FullAtom, ContainerAtom, NestedAtom
     		eightMultiple = eightMultiple - 1;
     	}
 
-    	int urxSize = 0;
-    	String urxName = "";
-    	byte[] urxPayload = null;
-    	UrxAtom urxAtom = null;
+    	int dataRefSize = 0;
+    	String dataRefName = "";
+    	byte[] dataRefPayload = null;
+    	GeneralAtom dataRef = null;
     	
     	int atomOffset = 4;
     	for (int i = 0; i < entryCount; i++)
     	{
-    		eightMultiple = 3;
+    		// reset per-entry temp
+    		dataRefSize = 0;
+    		int localEight = 3;
     		for (int j = atomOffset; j < atomOffset + 4; j++)
     		{
-    			urxSize = urxSize | (payload[j] & 0xFF) << 8 * eightMultiple;
-    			eightMultiple = eightMultiple - 1;
+    			dataRefSize = dataRefSize | (payload[j] & 0xFF) << 8 * localEight;
+    			localEight = localEight - 1;
     		}
     		
-    		urxName = new String(Arrays.copyOfRange(payload, atomOffset + 4, atomOffset + 8));
-    		urxPayload = Arrays.copyOfRange(payload, atomOffset + 8, atomOffset + urxSize);
+    		dataRefName = new String(Arrays.copyOfRange(payload, atomOffset + 4, atomOffset + 8));
+    		dataRefPayload = Arrays.copyOfRange(payload, atomOffset + 8, atomOffset + dataRefSize);
     		
-    		urxAtom = (UrxAtom) AtomRegistry.createAtom(urxSize, urxName, urxPayload);
-    		urxAtom = urxAtom.parse();
-    		urxAtom.setParent(this);
-    		this.addAtom(urxAtom);
+    		dataRef = AtomRegistry.createAtom(dataRefSize, dataRefName, dataRefPayload);
     		
-    		atomOffset = atomOffset + urxSize;
+    		if (dataRef instanceof FullAtom)
+    		{
+    			dataRef = ((FullAtom) dataRef).parse();
+    		}
+    		
+    		if (dataRef instanceof NestedAtom)
+    		{
+    			this.addAtom((NestedAtom) dataRef);
+    		}
+    			
+    		atomOffset = atomOffset + dataRefSize;
     	}
     	
     	payload = null;

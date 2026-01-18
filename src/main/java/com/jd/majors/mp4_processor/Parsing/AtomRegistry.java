@@ -6,6 +6,12 @@ import com.jd.majors.mp4_processor.AtomClasses.Classes.*;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * AtomRegistry holds a mapping from four-character atom names to factory
+ * functions that construct atom instances. This central registry makes it
+ * easy to extend supported atom types by registering a factory at
+ * initialization time.
+ */
 public class AtomRegistry 
 {
 	private static final Map<String, AtomFactory> registry = new HashMap<String, AtomFactory>();
@@ -70,6 +76,7 @@ public class AtomRegistry
         // Sample tables
         registerAtom("stbl", (s, n, p) -> new StblAtom(s, n, p));
         registerAtom("stsd", (s, n, p) -> new StsdAtom(s, n, p));
+        registerAtom("avc1", (s, n, p) -> new AvcAtom(s, n, p));
         registerAtom("stts", (s, n, p) -> new SttsAtom(s, n, p));
         registerAtom("stsc", (s, n, p) -> new StscAtom(s, n, p));
         registerAtom("stsz", (s, n, p) -> new StszAtom(s, n, p));
@@ -80,11 +87,9 @@ public class AtomRegistry
         // User data / metadata
         registerAtom("udta", (s, n, p) -> new UdtaAtom(s, n, p));
         registerAtom("meta", (s, n, p) -> new MetaAtom(s, n, p));
-        registerAtom("iods", (s, n, p) -> new IodsAtom(s, n, p));
 
     }
     
     // prevents object instantiation
     private AtomRegistry() {}
 }
-

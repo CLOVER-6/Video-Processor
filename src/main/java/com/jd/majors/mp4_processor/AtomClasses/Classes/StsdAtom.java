@@ -11,6 +11,14 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 import com.jd.majors.mp4_processor.Parsing.AtomRegistry;
 
+/**
+ * Sample description atom (stsd).
+ *
+ * Notes:
+ * - Contains a list of sample description atoms (e.g. AVC codec boxes).
+ * - This implementation enforces that sample descriptions are `AvcAtom` instances.
+ * - The internal payload is cleared after parsing to prevent re-parsing.
+ */
 public class StsdAtom implements FullAtom, NestedAtom, ContainerAtom 
 {
 	private GeneralAtom parentAtom;
@@ -20,7 +28,7 @@ public class StsdAtom implements FullAtom, NestedAtom, ContainerAtom
     private final byte[] flags;
     private int entryCount;
     private final List<GeneralAtom> sampleDescs;
-    private final byte[] payload;
+    private byte[] payload;
 
     public StsdAtom(GeneralAtom parentAtom, int s, String n, short version, byte[] f, int entryCount, List<GeneralAtom> sampleDescs, byte[] payload) 
     {
@@ -63,7 +71,7 @@ public class StsdAtom implements FullAtom, NestedAtom, ContainerAtom
         this.flags = Arrays.copyOfRange(payload, 1, 4);
         this.entryCount = 0;
         this.sampleDescs = new ArrayList<GeneralAtom>();
-        this.payload = Arrays.copyOfRange(payload, 5, payload.length);
+        this.payload = Arrays.copyOfRange(payload, 4, payload.length);
     }
 
     // check drefAtom for note on the privacy controls of this func
@@ -74,7 +82,7 @@ public class StsdAtom implements FullAtom, NestedAtom, ContainerAtom
     		throw new IllegalArgumentException();
     	}
     	
-    	atom.setParent(atom);
+    	atom.setParent(this);
     	sampleDescs.add(atom);
     }
     
@@ -92,31 +100,44 @@ public class StsdAtom implements FullAtom, NestedAtom, ContainerAtom
         	entryCount = entryCount | (payload[i] & 0xFF) << 8 * eightMultiple;
         	eightMultiple = eightMultiple - 1;
         } 
-    	
+
+        // push pointer away from entry count
+    	int atomOffset = 4;
+        
         int sampleDecSize = 0;
         String sampleDecName = "";
         byte[] sampleDecPayload = null;
-        FullAtom sampleDec = null;
-        
+        GeneralAtom sampleDec = null;
+       
         for (int i = 0; i < entryCount; i++)
         {
-        	int atomOffset = 4;
         	eightMultiple = 3;
-        	for (int j = atomOffset; j < atomOffset + 4; i++) 
+        	for (int j = atomOffset; j < atomOffset + 4; j++) 
             {
-        		sampleDecSize = sampleDecSize | (payload[i] & 0xFF) << 8 * eightMultiple;
+        		sampleDecSize = sampleDecSize | (payload[j] & 0xFF) << 8 * eightMultiple;
             	eightMultiple = eightMultiple - 1;
     		}
         	
         	sampleDecName = new String(Arrays.copyOfRange(payload, atomOffset + 4, atomOffset + 8));
         	sampleDecPayload = Arrays.copyOfRange(payload, atomOffset + 8, sampleDecSize + atomOffset);
-        	sampleDec = (FullAtom) AtomRegistry.createAtom(sampleDecSize, sampleDecName, sampleDecPayload);
+        	sampleDec = AtomRegistry.createAtom(sampleDecSize, sampleDecName, sampleDecPayload);
         	
-        	sampleDec = sampleDec.parse();
+//        	if (sampleDec instanceof FullAtom)
+//        	{
+//        		((FullAtom) sampleDec).parse();
+//        	}
+        	
+        	if (sampleDec instanceof NestedAtom)
+        	{
+        		this.addAtom((NestedAtom) sampleDec);
+        	}
         	
         	atomOffset = atomOffset + sampleDecSize;
         }
         
+    	// ensure payload is nulled so subsequent parse calls can't re-parse unexpectedly
+    	payload = null;
+    	
     	return this;
     }
     
@@ -163,6 +184,4 @@ public class StsdAtom implements FullAtom, NestedAtom, ContainerAtom
 				&& Objects.equals(parentAtom, other.parentAtom) && Objects.equals(sampleDescs, other.sampleDescs)
 				&& size == other.size && version == other.version;
 	}
-    
-    
 }

@@ -16,43 +16,40 @@ public class FtypAtom implements BasicAtom, TopLevelAtom
     private byte[] payload;
     
     public FtypAtom(int size, String name, String majorBrand, long minorVersion, String[] compatibleBrands,
-			byte[] payload) 
+            byte[] payload) 
     {
-		this.size = size;
-		this.name = name;
-		this.majorBrand = majorBrand;
-		this.minorVersion = minorVersion;
-		this.compatibleBrands = compatibleBrands;
-		this.payload = null;
-	}
+        this.size = size;
+        this.name = name;
+        this.majorBrand = majorBrand;
+        this.minorVersion = minorVersion;
+        this.compatibleBrands = compatibleBrands;
+        this.payload = null; // full-value constructor should not keep payload
+    }
 
-	public FtypAtom(int size, String name, byte[] payload) 
+    public FtypAtom(int size, String name, byte[] payload) 
     {
         this.size = size;
         this.name = name;
         this.majorBrand = "";
         this.minorVersion = 0;
-        this.compatibleBrands = new String[size - 16];
+        this.compatibleBrands = null;
         this.payload = payload;
     }
 
     public void parse() throws Exception
     {
-    	if (payload == null)
-    	{
-    		throw new Exception("Empty Payload - Cannot parse");
-    	}
-    	
+        if (payload == null)
+        {
+            throw new Exception("Empty Payload - Cannot parse");
+        }
+        
         majorBrand = new String(Arrays.copyOfRange(payload, 0, 4));
         
         int eightMultiple = 3;
         for (int i = 4; i < 8; i++)
         {
-        	// bytes are inherently signed in java so "& 0xFF" unsigns
-        	// << left shifts by decrementing multiples of 8 to place bits in respective spots
-        	// using long because java ints are signed whilst minor version is unsigned
-        	minorVersion = minorVersion | (payload[i] & 0xFF) << 8 * eightMultiple;
-        	eightMultiple = eightMultiple - 1;
+            minorVersion = minorVersion | ((long)(payload[i] & 0xFF) << (8 * eightMultiple));
+            eightMultiple = eightMultiple - 1;
         }
 
         // gather compatible brands
@@ -61,8 +58,8 @@ public class FtypAtom implements BasicAtom, TopLevelAtom
         int cbPointer = 0;
         for (int i = 8; i < payload.length; i = i + 4)
         {
-        	compatibleBrands[cbPointer] = new String(Arrays.copyOfRange(payload, i, i + 4));
-        	cbPointer = cbPointer + 1;
+            compatibleBrands[cbPointer] = new String(Arrays.copyOfRange(payload, i, i + 4));
+            cbPointer = cbPointer + 1;
         }
         
         // not allow parsing of atom multiple times
@@ -78,14 +75,13 @@ public class FtypAtom implements BasicAtom, TopLevelAtom
     @Override
     public String toString() 
     {
-        return "FtypAtom [size=" + size + ", name=" + name + ", payloadLength=" +
-               (payload != null ? payload.length : 0) + "]";
+        return "FtypAtom [size=" + size + ", name=" + name + ", majorBrand=" + majorBrand + ", minorVersion=" + minorVersion + ", compatibleBrands=" + Arrays.toString(compatibleBrands) + "]";
     }
 
     @Override
     public int hashCode() 
     {
-        return Objects.hash(size, name, java.util.Arrays.hashCode(payload));
+        return Objects.hash(size, name, majorBrand, minorVersion, Arrays.hashCode(compatibleBrands));
     }
 
     @Override
@@ -95,6 +91,7 @@ public class FtypAtom implements BasicAtom, TopLevelAtom
         if (!(obj instanceof FtypAtom)) return false;
         FtypAtom other = (FtypAtom) obj;
         return size == other.size && Objects.equals(name, other.name)
-            && java.util.Arrays.equals(payload, other.payload);
+            && Objects.equals(majorBrand, other.majorBrand) && minorVersion == other.minorVersion
+            && Arrays.equals(compatibleBrands, other.compatibleBrands);
     }
 }

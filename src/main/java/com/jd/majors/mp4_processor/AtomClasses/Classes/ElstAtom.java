@@ -15,7 +15,7 @@ public class ElstAtom implements FullAtom, NestedAtom
     private final byte[] flags;
     private int entryCount;
     private long[][] entries;
-    private final byte[] payload;
+    private byte[] payload;
 
     public ElstAtom(GeneralAtom parentAtom, int size, String name, short version, byte[] flags, int entryCount, long[][] entries,
 			byte[] payload) 
@@ -110,6 +110,9 @@ public class ElstAtom implements FullAtom, NestedAtom
         	entriesPointer = entriesPointer + 1;
         }
         
+        // ensure payload cannot be re-parsed
+        payload = null;
+        
         return this;
     }
 
@@ -129,7 +132,7 @@ public class ElstAtom implements FullAtom, NestedAtom
 	@Override
 	public String toString() 
 	{
-		return "ElstAtom [size=" + size + ", name=" + name + ", version=" + version + ", flags="
+		return "ElstAtom [parentAtom=" + parentAtom + ", size=" + size + ", name=" + name + ", version=" + version + ", flags="
 				+ Arrays.toString(flags) + ", entryCount=" + entryCount + ", entries=" + Arrays.toString(entries) + "]";
 	}
 
@@ -140,7 +143,7 @@ public class ElstAtom implements FullAtom, NestedAtom
 		int result = 1;
 		result = prime * result + Arrays.deepHashCode(entries);
 		result = prime * result + Arrays.hashCode(flags);
-		result = prime * result + Objects.hash(entryCount, name, size, version);
+		result = prime * result + Objects.hash(entryCount, name, parentAtom, size, version);
 		return result;
 	}
 
@@ -156,7 +159,7 @@ public class ElstAtom implements FullAtom, NestedAtom
 		ElstAtom other = (ElstAtom) obj;
 		return Arrays.deepEquals(entries, other.entries) && entryCount == other.entryCount
 				&& Arrays.equals(flags, other.flags) && Objects.equals(name, other.name) && size == other.size
-				&& version == other.version;
+				&& version == other.version && Objects.equals(parentAtom, other.parentAtom);
 	}
 
     

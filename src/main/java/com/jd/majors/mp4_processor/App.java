@@ -6,6 +6,12 @@ import com.jd.majors.mp4_processor.AtomClasses.Classes.FtypAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Classes.HdlrAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Classes.MdhdAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Classes.MvhdAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Classes.StcoAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Classes.StscAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Classes.StsdAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Classes.StssAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Classes.StszAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Classes.SttsAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Classes.TkhdAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Classes.VmhdAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.BasicAtom;
@@ -16,7 +22,6 @@ import com.jd.majors.mp4_processor.Parsing.Mp4File;
 import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
-import com.jd.majors.mp4_processor.AtomClasses.Classes.DrefAtom.UrxAtom;
 
 public class App 
 {
@@ -28,10 +33,16 @@ public class App
         // Get the file channel
         FileChannel channel = file.getChannel();
        
-        GeneralAtom mvhd = Mp4File.createAtom(channel, 11263);
+        Mp4File mp4file = new Mp4File(channel);
         
-        System.out.println(mvhd.size());
-        System.out.println(mvhd.name());
+        StcoAtom test = (StcoAtom) mp4file.createAtom(14564);
+
+        test = test.parse();    
+        
+        System.out.println(test.size());
+        System.out.println(test.name());
+        
+        System.out.println(test.toString());
         
         file.close();
     }

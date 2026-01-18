@@ -17,10 +17,10 @@ public class CttsAtom implements FullAtom, NestedAtom
     private long[][] entries;
     private byte[] payload;
     
-    public CttsAtom(GeneralAtom parentAtom, int size, String name, short version, byte[] flags, int entryCount, long[][] entries,
+    public CttsAtom(int size, String name, short version, byte[] flags, int entryCount, long[][] entries,
 			byte[] payload) 
     {
-		this.parentAtom = parentAtom;
+		this.parentAtom = null;
 		this.size = size;
 		this.name = name;
 		this.version = version;
@@ -108,12 +108,13 @@ public class CttsAtom implements FullAtom, NestedAtom
 	{
 		this.parentAtom = atom;
 	}
-	
+
 	@Override
 	public String toString() 
 	{
-		return "CttsAtom [size=" + size + ", name=" + name + ", version=" + version + ", flags="
-				+ Arrays.toString(flags) + ", entryCount=" + entryCount + ", entries=" + Arrays.toString(entries) + "]";
+		return "CttsAtom [parentAtom=" + parentAtom + ", size=" + size + ", name=" + name + ", version=" + version
+				+ ", flags=" + Arrays.toString(flags) + ", entryCount=" + entryCount + ", entries="
+				+ Arrays.toString(entries) + "]";
 	}
 
 	@Override
@@ -123,7 +124,7 @@ public class CttsAtom implements FullAtom, NestedAtom
 		int result = 1;
 		result = prime * result + Arrays.deepHashCode(entries);
 		result = prime * result + Arrays.hashCode(flags);
-		result = prime * result + Objects.hash(entryCount, name, size, version);
+		result = prime * result + Objects.hash(entryCount, name, parentAtom, size, version);
 		return result;
 	}
 
@@ -138,7 +139,9 @@ public class CttsAtom implements FullAtom, NestedAtom
 			return false;
 		CttsAtom other = (CttsAtom) obj;
 		return Arrays.deepEquals(entries, other.entries) && entryCount == other.entryCount
-				&& Arrays.equals(flags, other.flags) && Objects.equals(name, other.name) && size == other.size
-				&& version == other.version;
+				&& Arrays.equals(flags, other.flags) && Objects.equals(name, other.name)
+				&& Objects.equals(parentAtom, other.parentAtom) && size == other.size && version == other.version;
 	}
+	
+	
 }

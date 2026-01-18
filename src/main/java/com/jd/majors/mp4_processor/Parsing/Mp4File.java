@@ -7,6 +7,17 @@ import java.util.Arrays;
 
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
 
+/**
+ * Mp4File is a lightweight reader for extracting raw atom byte ranges from
+ * an open FileChannel and for constructing atom instances via the
+ * AtomRegistry. It exposes a convenience `createAtom` that reads a single
+ * atom at the provided file offset and returns an un-parsed atom object.
+ *
+ * Implementation notes:
+ * - getRawAtom uses memory-mapping (MappedByteBuffer) for performance on
+ *   large files. Consumers must ensure offsets passed in are correct; the
+ *   method assumes the offset points to the start of an MP4 atom.
+ */
 public class Mp4File
 {
 	private final FileChannel fileChannel;

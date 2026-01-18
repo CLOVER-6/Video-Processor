@@ -8,7 +8,7 @@ public class FreeAtom implements BasicAtom, TopLevelAtom
 {
     private final int size;
     private final String name;
-    private final byte[] payload;
+    private byte[] payload;
 
     public FreeAtom(int size, String name, byte[] payload) 
     {
@@ -17,10 +17,13 @@ public class FreeAtom implements BasicAtom, TopLevelAtom
         this.payload = payload;
     }
 
-    // TODO fill this out
-    public void parse() 
+    public void parse() throws Exception
     {
-
+        if (payload == null)
+        {
+            throw new Exception("Empty Payload - Cannot parse");
+        }
+        payload = null;
     }
     
     public int size() { return size; }
@@ -30,14 +33,13 @@ public class FreeAtom implements BasicAtom, TopLevelAtom
     @Override
     public String toString() 
     {
-        return "FreeAtom [size=" + size + ", name=" + name + ", payloadLength=" +
-               (payload != null ? payload.length : 0) + "]";
+        return "FreeAtom [size=" + size + ", name=" + name + "]";
     }
 
     @Override
     public int hashCode() 
     {
-        return Objects.hash(size, name, java.util.Arrays.hashCode(payload));
+        return Objects.hash(size, name);
     }
 
     @Override
@@ -46,7 +48,6 @@ public class FreeAtom implements BasicAtom, TopLevelAtom
         if (this == obj) return true;
         if (!(obj instanceof FreeAtom)) return false;
         FreeAtom other = (FreeAtom) obj;
-        return size == other.size && Objects.equals(name, other.name)
-            && java.util.Arrays.equals(payload, other.payload);
+        return size == other.size && Objects.equals(name, other.name);
     }
 }

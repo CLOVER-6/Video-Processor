@@ -7,6 +7,13 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Track header atom (tkhd).
+ *
+ * Notes:
+ * - Several fields are version-dependent (timestamps and duration).
+ * - Parses the track header and then clears payload to prevent re-parsing.
+ */
 public class TkhdAtom implements FullAtom, NestedAtom 
 {
 	private GeneralAtom parentAtom;

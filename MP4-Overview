@@ -452,6 +452,10 @@ stts - Time To Sample
     - the tts table contains the amount of consecutive samples with the same sample duration, and then the sample duration, measured
     in the tracks timescale
 
+    - basically stores each sample in run length encoding based on length of samples
+
+    - sample length is in mdhd time
+
 stss - Sync Samples
     - a video needs certain frames, keyframes or intra-coded frames (I-frames), that are full frames that require no subsequent or
     previous frames to be decoded. The sync sample table states these keyframes identified by their index in the sequence of samples

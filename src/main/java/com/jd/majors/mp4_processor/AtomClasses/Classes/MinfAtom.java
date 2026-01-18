@@ -14,9 +14,9 @@ public class MinfAtom implements ContainerAtom, NestedAtom
     private final String name;
     private final List<GeneralAtom> childAtoms;
 
-    public MinfAtom(GeneralAtom parentAtom, int size, String name, List<GeneralAtom> childAtoms) 
+    public MinfAtom(int size, String name, List<GeneralAtom> childAtoms) 
     {
-    	this.parentAtom = parentAtom;
+    	this.parentAtom = null;
         this.size = size;
         this.name = name;
         this.childAtoms = childAtoms;

@@ -3,20 +3,21 @@ package com.jd.majors.mp4_processor.AtomClasses.Classes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.ContainerAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
-public class DinfAtom implements ContainerAtom, NestedAtom
+public class DinfAtom implements NestedAtom, ContainerAtom 
 {
 	private GeneralAtom parentAtom;
     private final int size;
     private final String name;
     private final List<GeneralAtom> childAtoms;
 
-    public DinfAtom(GeneralAtom parentAtom, int size, String name, List<GeneralAtom> childAtoms) 
+    public DinfAtom(int size, String name, List<GeneralAtom> childAtoms) 
     {
-    	this.parentAtom = parentAtom;
+    	this.parentAtom = null;
         this.size = size;
         this.name = name;
         this.childAtoms = childAtoms;
@@ -29,42 +30,47 @@ public class DinfAtom implements ContainerAtom, NestedAtom
         this.name = name;
         this.childAtoms = new ArrayList<GeneralAtom>();
     }
-
+    
     public void addAtom(NestedAtom atom)
     {
     	atom.setParent(this);
     	childAtoms.add(atom);
     }
-    
+
     public GeneralAtom parentAtom() { return parentAtom; }
     public int size() { return size; }
     public String name() { return name; }
     public List<GeneralAtom> childAtoms() { return childAtoms; }
-    
+
     public void setParent(GeneralAtom atom)
-    {
-    	this.parentAtom = atom;
-    }
-    
-    @Override
-    public String toString() 
-    {
-        return "DinfAtom [size=" + size + ", name=" + name + ", childAtoms=" + childAtoms + "]";
-    }
+	{
+		this.parentAtom = atom;
+	}
 
-    @Override
-    public int hashCode() 
-    {
-        return Objects.hash(size, name, childAtoms);
-    }
+	@Override
+	public String toString() 
+	{
+		return "DinfAtom [parentAtom=" + parentAtom + ", size=" + size + ", name=" + name + ", childAtoms=" + childAtoms
+				+ "]";
+	}
 
-    @Override
-    public boolean equals(Object obj) 
-    {
-        if (this == obj) return true;
-        if (!(obj instanceof DinfAtom)) return false;
-        DinfAtom other = (DinfAtom) obj;
-        return size == other.size && Objects.equals(name, other.name) &&
-               Objects.equals(childAtoms, other.childAtoms);
-    }
+	@Override
+	public int hashCode() 
+	{
+		return Objects.hash(childAtoms, name, parentAtom, size);
+	}
+
+	@Override
+	public boolean equals(Object obj) 
+	{
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DinfAtom other = (DinfAtom) obj;
+		return Objects.equals(childAtoms, other.childAtoms) && Objects.equals(name, other.name)
+				&& Objects.equals(parentAtom, other.parentAtom) && size == other.size;
+	}
 }

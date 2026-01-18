@@ -13,7 +13,7 @@ public class SmhdAtom implements FullAtom, NestedAtom
     private final String name;
     private final short version;
     private final byte[] flags;
-    private final byte[] payload;
+    private byte[] payload;
 
     public SmhdAtom(GeneralAtom parentAtom, int s, String n, short version, byte[] f, byte[] payload) 
     {
@@ -22,7 +22,7 @@ public class SmhdAtom implements FullAtom, NestedAtom
         this.name = n;
         this.version = version;
         this.flags = f;
-        this.payload = payload;
+        this.payload = null; // full-value constructor should not keep payload
     }
 
     public SmhdAtom(int s, String n, byte[] payload) 
@@ -32,14 +32,19 @@ public class SmhdAtom implements FullAtom, NestedAtom
         this.name = n;
         this.version = payload[0];
         this.flags = Arrays.copyOfRange(payload, 1, 4);
-        this.payload = Arrays.copyOfRange(payload, 5, payload.length);
+        this.payload = Arrays.copyOfRange(payload, 4, payload.length); // fixed start index
     }
 
-    // TODO fill this out
-    public SmhdAtom parse() 
+    public SmhdAtom parse() throws Exception
     {
-    	return this;
-    }	
+        if (payload == null)
+        {
+            throw new Exception("Empty Payload - Cannot parse");
+        }
+        // no additional parsing here; clear payload
+        payload = null;
+        return this;
+    }    
     
     public GeneralAtom parentAtom() { return parentAtom; }
     public int size() { return size; }
@@ -56,14 +61,14 @@ public class SmhdAtom implements FullAtom, NestedAtom
     @Override
     public String toString() 
     {
-        return "SmhdAtom [size=" + size + ", name=" + name + ", version=" + version +
-               ", flags=" + flags + ", payloadLength=" + (payload != null ? payload.length : 0) + "]";
+        return "SmhdAtom [parentAtom=" + parentAtom + ", size=" + size + ", name=" + name + ", version=" + version +
+               ", flags=" + Arrays.toString(flags) + "]";
     }
 
     @Override
     public int hashCode() 
     {
-        return Objects.hash(size, name, version, Arrays.hashCode(flags), java.util.Arrays.hashCode(payload));
+        return Objects.hash(size, name, version, Arrays.hashCode(flags));
     }
 
     @Override
@@ -73,6 +78,6 @@ public class SmhdAtom implements FullAtom, NestedAtom
         if (!(obj instanceof SmhdAtom)) return false;
         SmhdAtom other = (SmhdAtom) obj;
         return size == other.size && version == other.version && Arrays.equals(flags, other.flags)
-            && Objects.equals(name, other.name) && java.util.Arrays.equals(payload, other.payload);
+            && Objects.equals(name, other.name);
     }
 }

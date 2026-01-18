@@ -6,6 +6,13 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Media header atom (mdhd).
+ *
+ * Notes:
+ * - Creation/modification times and duration are version-dependent (32-bit vs 64-bit).
+ * - Language is stored as three 5-bit characters per ISO spec and decoded during parsing.
+ */
 public class MdhdAtom implements FullAtom, NestedAtom 
 {
 	private GeneralAtom parentAtom;

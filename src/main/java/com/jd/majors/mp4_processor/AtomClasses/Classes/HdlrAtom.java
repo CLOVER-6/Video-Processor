@@ -18,7 +18,7 @@ public class HdlrAtom implements FullAtom, NestedAtom
     private byte[] payload;
 
     public HdlrAtom(GeneralAtom parentAtom, int size, String name, short version, byte[] flags, String handlerType, String handlerName,
-			byte[] payload) 
+				byte[] payload) 
     {
 		this.parentAtom = parentAtom;
 		this.size = size;
@@ -44,7 +44,7 @@ public class HdlrAtom implements FullAtom, NestedAtom
 
     public HdlrAtom(int s, String n, byte[] payload) 
     {
-    	this.parentAtom = null;
+     this.parentAtom = null;
         this.size = s;
         this.name = n;
         this.version = payload[0];
@@ -57,24 +57,29 @@ public class HdlrAtom implements FullAtom, NestedAtom
     // TODO fill this out
     public HdlrAtom parse() throws Exception 
     {
-    	if (payload == null)
-    	{
-    		throw new Exception("Empty Payload - Cannot parse");
-    	}
-    	
-    	handlerType = new String(Arrays.copyOfRange(payload, 4, 8));
-    	
-    	int payloadPointer = 20;
-    	while (payload[payloadPointer] != 0x00)
-    	{
-    		payloadPointer++;
-    	} 
-    	
-    	handlerName = new String(Arrays.copyOfRange(payload, 20, payloadPointer));
-    	
-    	payload = null;
-    	
-    	return this;
+     if (payload == null)
+     {
+      throw new Exception("Empty Payload - Cannot parse");
+     }
+     
+     // handlerType lives at original payload bytes 8..11; after stripping first 4 bytes, it's at 4..7
+     handlerType = new String(Arrays.copyOfRange(payload, 4, 8));
+     
+     int payloadPointer = 16; // name starts at original offset 20, which is 16 after we've stripped the first 4 bytes
+     // guard: ensure pointer within bounds
+     if (payloadPointer >= payload.length) {
+         handlerName = "";
+     } else {
+         int nameEnd = payloadPointer;
+         while (nameEnd < payload.length && payload[nameEnd] != 0x00) {
+             nameEnd++;
+         }
+         handlerName = new String(Arrays.copyOfRange(payload, payloadPointer, nameEnd));
+     }
+     
+     payload = null;
+     
+     return this;
     }
 
     public GeneralAtom parentAtom() { return parentAtom; }
