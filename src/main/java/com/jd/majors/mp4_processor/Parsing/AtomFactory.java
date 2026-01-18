@@ -1,9 +1,9 @@
 package com.jd.majors.mp4_processor.Parsing;
 
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 
 @FunctionalInterface
 public interface AtomFactory 
 {
-	GeneralAtom createAtom(int size, String name, byte[] payload);
+	Box createAtom(int size, String name, byte[] payload);
 }

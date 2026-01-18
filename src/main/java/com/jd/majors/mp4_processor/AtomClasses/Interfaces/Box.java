@@ -6,7 +6,7 @@ package com.jd.majors.mp4_processor.AtomClasses.Interfaces;
  * name and its size in bytes. Specialized atom kinds extend this interface
  * (FullAtom, BasicAtom, NestedAtom, ContainerAtom, TopLevelAtom).
  */
-public sealed interface GeneralAtom permits FullAtom, BasicAtom, NestedAtom, TopLevelAtom, ContainerAtom
+public sealed interface Box permits FullBox, Leaf, NestedAtom, TopLevelAtom, ContainerBox
 {
 	String name();
 	int size();

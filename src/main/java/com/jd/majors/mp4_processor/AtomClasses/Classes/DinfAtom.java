@@ -4,18 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.ContainerAtom;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.ContainerBox;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
-public class DinfAtom implements NestedAtom, ContainerAtom 
+public class DinfAtom implements NestedAtom, ContainerBox 
 {
-	private GeneralAtom parentAtom;
+	private Box parentAtom;
     private final int size;
     private final String name;
-    private final List<GeneralAtom> childAtoms;
+    private final List<Box> childAtoms;
 
-    public DinfAtom(int size, String name, List<GeneralAtom> childAtoms) 
+    public DinfAtom(int size, String name, List<Box> childAtoms) 
     {
     	this.parentAtom = null;
         this.size = size;
@@ -28,7 +28,7 @@ public class DinfAtom implements NestedAtom, ContainerAtom
     	this.parentAtom = null;
         this.size = size;
         this.name = name;
-        this.childAtoms = new ArrayList<GeneralAtom>();
+        this.childAtoms = new ArrayList<Box>();
     }
     
     public void addAtom(NestedAtom atom)
@@ -37,12 +37,12 @@ public class DinfAtom implements NestedAtom, ContainerAtom
     	childAtoms.add(atom);
     }
 
-    public GeneralAtom parentAtom() { return parentAtom; }
+    public Box parentAtom() { return parentAtom; }
     public int size() { return size; }
     public String name() { return name; }
-    public List<GeneralAtom> childAtoms() { return childAtoms; }
+    public List<Box> childAtoms() { return childAtoms; }
 
-    public void setParent(GeneralAtom atom)
+    public void setParent(Box atom)
 	{
 		this.parentAtom = atom;
 	}
@@ -50,14 +50,13 @@ public class DinfAtom implements NestedAtom, ContainerAtom
 	@Override
 	public String toString() 
 	{
-		return "DinfAtom [parentAtom=" + parentAtom + ", size=" + size + ", name=" + name + ", childAtoms=" + childAtoms
-				+ "]";
+		return "DinfAtom [size=" + size + ", name=" + name + "]";
 	}
 
 	@Override
 	public int hashCode() 
 	{
-		return Objects.hash(childAtoms, name, parentAtom, size);
+		return Objects.hash(name, size);
 	}
 
 	@Override
@@ -70,7 +69,8 @@ public class DinfAtom implements NestedAtom, ContainerAtom
 		if (getClass() != obj.getClass())
 			return false;
 		DinfAtom other = (DinfAtom) obj;
-		return Objects.equals(childAtoms, other.childAtoms) && Objects.equals(name, other.name)
-				&& Objects.equals(parentAtom, other.parentAtom) && size == other.size;
+		return Objects.equals(name, other.name) && size == other.size;
 	}
+
+	
 }

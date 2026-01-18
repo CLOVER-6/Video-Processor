@@ -5,9 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.ContainerAtom;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullAtom;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.ContainerBox;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullBox;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 import com.jd.majors.mp4_processor.Parsing.AtomRegistry;
 
@@ -19,18 +20,18 @@ import com.jd.majors.mp4_processor.Parsing.AtomRegistry;
  * - This implementation enforces that sample descriptions are `AvcAtom` instances.
  * - The internal payload is cleared after parsing to prevent re-parsing.
  */
-public class StsdAtom implements FullAtom, NestedAtom, ContainerAtom 
+public class StsdAtom implements FullBox, NestedAtom, ContainerBox , Leaf
 {
-	private GeneralAtom parentAtom;
+	private Box parentAtom;
     private final int size;
     private final String name;
     private final short version;
     private final byte[] flags;
     private int entryCount;
-    private final List<GeneralAtom> sampleDescs;
+    private final List<Box> sampleDescs;
     private byte[] payload;
 
-    public StsdAtom(GeneralAtom parentAtom, int s, String n, short version, byte[] f, int entryCount, List<GeneralAtom> sampleDescs, byte[] payload) 
+    public StsdAtom(Box parentAtom, int s, String n, short version, byte[] f, int entryCount, List<Box> sampleDescs, byte[] payload) 
     {
     	this.parentAtom = parentAtom;
         this.size = s;
@@ -40,7 +41,7 @@ public class StsdAtom implements FullAtom, NestedAtom, ContainerAtom
         this.entryCount = entryCount;
         this.sampleDescs = sampleDescs;
         // not allowing instantiation with other types
-        for (GeneralAtom sampleDesc : sampleDescs)
+        for (Box sampleDesc : sampleDescs)
         {
         	if (!(sampleDesc instanceof AvcAtom))
         	{
@@ -58,7 +59,7 @@ public class StsdAtom implements FullAtom, NestedAtom, ContainerAtom
         this.version = version;
         this.flags = flags;
         this.entryCount = 0;
-        this.sampleDescs = new ArrayList<GeneralAtom>();
+        this.sampleDescs = new ArrayList<Box>();
         this.payload = payload;
     }
     
@@ -70,7 +71,7 @@ public class StsdAtom implements FullAtom, NestedAtom, ContainerAtom
         this.version = payload[0];
         this.flags = Arrays.copyOfRange(payload, 1, 4);
         this.entryCount = 0;
-        this.sampleDescs = new ArrayList<GeneralAtom>();
+        this.sampleDescs = new ArrayList<Box>();
         this.payload = Arrays.copyOfRange(payload, 4, payload.length);
     }
 
@@ -98,7 +99,7 @@ public class StsdAtom implements FullAtom, NestedAtom, ContainerAtom
         for (int i = 0; i < 4; i++)
         {
         	entryCount = entryCount | (payload[i] & 0xFF) << 8 * eightMultiple;
-        	eightMultiple = eightMultiple - 1;
+        	 eightMultiple = eightMultiple - 1;
         } 
 
         // push pointer away from entry count
@@ -107,7 +108,7 @@ public class StsdAtom implements FullAtom, NestedAtom, ContainerAtom
         int sampleDecSize = 0;
         String sampleDecName = "";
         byte[] sampleDecPayload = null;
-        GeneralAtom sampleDec = null;
+        Box sampleDec = null;
        
         for (int i = 0; i < entryCount; i++)
         {
@@ -116,7 +117,7 @@ public class StsdAtom implements FullAtom, NestedAtom, ContainerAtom
             {
         		sampleDecSize = sampleDecSize | (payload[j] & 0xFF) << 8 * eightMultiple;
             	eightMultiple = eightMultiple - 1;
-    		}
+        	}
         	
         	sampleDecName = new String(Arrays.copyOfRange(payload, atomOffset + 4, atomOffset + 8));
         	sampleDecPayload = Arrays.copyOfRange(payload, atomOffset + 8, sampleDecSize + atomOffset);
@@ -141,23 +142,23 @@ public class StsdAtom implements FullAtom, NestedAtom, ContainerAtom
     	return this;
     }
     
-    public GeneralAtom parentAtom() { return parentAtom; }
+    public Box parentAtom() { return parentAtom; }
     public int size() { return size; }
     public String name() { return name; }
     public short version() { return version; }
     public byte[] flags() { return flags; }
     public int entryCount() { return entryCount; }
-    public List<GeneralAtom> childAtoms() { return sampleDescs; }
+    public List<Box> childAtoms() { return sampleDescs; }
     public byte[] payload() { return payload; }
     
-    public void setParent(GeneralAtom atom)
+    public void setParent(Box atom)
     {
     	this.parentAtom = atom;
     }
 
 	@Override
 	public String toString() {
-		return "StsdAtom [parentAtom=" + parentAtom + ", size=" + size + ", name=" + name + ", version=" + version
+		return "StsdAtom [size=" + size + ", name=" + name + ", version=" + version
 				+ ", flags=" + Arrays.toString(flags) + ", entryCount=" + entryCount + ", sampleDescs=" + sampleDescs
 				+ "]";
 	}
@@ -167,7 +168,7 @@ public class StsdAtom implements FullAtom, NestedAtom, ContainerAtom
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + Arrays.hashCode(flags);
-		result = prime * result + Objects.hash(entryCount, name, parentAtom, sampleDescs, size, version);
+		result = prime * result + Objects.hash(entryCount, name, sampleDescs, size, version);
 		return result;
 	}
 
@@ -181,7 +182,8 @@ public class StsdAtom implements FullAtom, NestedAtom, ContainerAtom
 			return false;
 		StsdAtom other = (StsdAtom) obj;
 		return entryCount == other.entryCount && Arrays.equals(flags, other.flags) && Objects.equals(name, other.name)
-				&& Objects.equals(parentAtom, other.parentAtom) && Objects.equals(sampleDescs, other.sampleDescs)
-				&& size == other.size && version == other.version;
+				&& Objects.equals(sampleDescs, other.sampleDescs) && size == other.size && version == other.version;
 	}
+
+	
 }

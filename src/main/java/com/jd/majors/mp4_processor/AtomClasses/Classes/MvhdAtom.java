@@ -2,8 +2,9 @@ package com.jd.majors.mp4_processor.AtomClasses.Classes;
 
 import java.util.Arrays;
 import java.util.Objects;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullAtom;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullBox;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
 /**
@@ -13,9 +14,9 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
  * - Field sizes for creation/modification time and duration are version-dependent (version 0 = 32-bit, version 1 = 64-bit).
  * - The class stores the parsed fields and clears the internal payload after parsing to avoid re-parsing.
  */
-public class MvhdAtom implements FullAtom, NestedAtom
+public class MvhdAtom implements FullBox, NestedAtom, Leaf
 {
-	private GeneralAtom parentAtom;
+	private Box parentAtom;
     private final int size;
     private final String name;
     private final short version;
@@ -30,10 +31,10 @@ public class MvhdAtom implements FullAtom, NestedAtom
     private long nextTrackID;
     private byte[] payload;
     
-    public MvhdAtom(GeneralAtom parentAtom, int size, String name, short version, byte[] flags, long creationTime, long modificationTime,
-			long timescale, long duration, long rate, int volume, short[][] matrix, long nextTrackID) 
+    public MvhdAtom(int size, String name, short version, byte[] flags, long creationTime, long modificationTime,
+				long timescale, long duration, long rate, int volume, short[][] matrix, long nextTrackID) 
     {
-    	this.parentAtom = parentAtom;
+    	this.parentAtom = null;
 		this.size = size;
 		this.name = name;
 		this.version = version;
@@ -151,15 +152,15 @@ public class MvhdAtom implements FullAtom, NestedAtom
         {
         	nextTrackID = nextTrackID | (payload[i] & 0xFF) << 8 * eightMultiple;
         	eightMultiple = eightMultiple - 1;
-    	}
-    	
-    	// dont allow atom to be parsed multiple times
-    	payload = null;
-    	
-    	return this;
+     	}
+     	
+     	// dont allow atom to be parsed multiple times
+     	payload = null;
+     	
+     	return this;
     }
     
-    public GeneralAtom parentAtom() { return parentAtom; } 
+    public Box parentAtom() { return parentAtom; } 
     public int size() { return size; }
     public String name() { return name; }
     public short version() { return version; }
@@ -173,14 +174,14 @@ public class MvhdAtom implements FullAtom, NestedAtom
 	public short[][] matrix() { return matrix; }
 	public long nextTrackID() { return nextTrackID; }
 	
-	public void setParent(GeneralAtom atom)
+	public void setParent(Box atom)
 	{
 		this.parentAtom = atom;
 	}
 	
 	@Override
 	public String toString() {
-		return "MvhdAtom [parentAtom=" + parentAtom + ", size=" + size + ", name=" + name + ", version=" + version + ", flags="
+		return "MvhdAtom [size=" + size + ", name=" + name + ", version=" + version + ", flags="
 				+ Arrays.toString(flags) + ", creationTime=" + creationTime + ", modificationTime=" + modificationTime
 				+ ", timescale=" + timescale + ", duration=" + duration + ", rate=" + rate + ", volume=" + volume
 				+ ", matrix=" + Arrays.toString(matrix) + ", nextTrackID=" + nextTrackID + "]";
@@ -192,7 +193,7 @@ public class MvhdAtom implements FullAtom, NestedAtom
 		int result = 1;
 		result = prime * result + Arrays.hashCode(flags);
 		result = prime * result + Arrays.deepHashCode(matrix);
-		result = prime * result + Objects.hash(parentAtom, creationTime, duration, modificationTime, name, nextTrackID, rate, size,
+		result = prime * result + Objects.hash(creationTime, duration, modificationTime, name, nextTrackID, rate, size,
 				timescale, version, volume);
 		return result;
 	}
@@ -208,9 +209,8 @@ public class MvhdAtom implements FullAtom, NestedAtom
 		MvhdAtom other = (MvhdAtom) obj;
 		return creationTime == other.creationTime && duration == other.duration && Arrays.equals(flags, other.flags)
 				&& Arrays.deepEquals(matrix, other.matrix) && modificationTime == other.modificationTime
-				&& Objects.equals(name, other.name) && nextTrackID == other.nextTrackID && rate == other.rate 
-				&& size == other.size && timescale == other.timescale && version == other.version && volume == other.volume && Objects.equals(parentAtom, other.parentAtom);
+				&& Objects.equals(name, other.name) && nextTrackID == other.nextTrackID && rate == other.rate
+				&& size == other.size && timescale == other.timescale && version == other.version
+				&& volume == other.volume;
 	}
-
-	
 }

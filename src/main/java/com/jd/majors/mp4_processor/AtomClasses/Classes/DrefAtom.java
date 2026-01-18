@@ -4,9 +4,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.ContainerAtom;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullAtom;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.ContainerBox;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullBox;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 import com.jd.majors.mp4_processor.Parsing.AtomRegistry;
 
@@ -18,18 +19,18 @@ import com.jd.majors.mp4_processor.Parsing.AtomRegistry;
  * - Parses children using `AtomRegistry.createAtom` and integrates them into the tree.
  * - Payload is cleared after parsing to prevent re-parsing.
  */
-public class DrefAtom implements FullAtom, ContainerAtom, NestedAtom
+public class DrefAtom implements FullBox, ContainerBox, NestedAtom, Leaf
 {
-	private GeneralAtom parentAtom;
+	private Box parentAtom;
     private final int size;
     private final String name;
     private final short version;
     private final byte[] flags;
     private int entryCount;
-    private List<GeneralAtom> dataReferences;
+    private List<Box> dataReferences;
     private byte[] payload;
 
-    public DrefAtom(GeneralAtom parentAtom, int size, String name, short version, byte[] flags, int entryCount, List<GeneralAtom> dataReferences) 
+    public DrefAtom(Box parentAtom, int size, String name, short version, byte[] flags, int entryCount, List<Box> dataReferences) 
     {
     	this.parentAtom = parentAtom;
 		this.size = size;
@@ -95,7 +96,7 @@ public class DrefAtom implements FullAtom, ContainerAtom, NestedAtom
     	int dataRefSize = 0;
     	String dataRefName = "";
     	byte[] dataRefPayload = null;
-    	GeneralAtom dataRef = null;
+    	Box dataRef = null;
     	
     	int atomOffset = 4;
     	for (int i = 0; i < entryCount; i++)
@@ -114,9 +115,9 @@ public class DrefAtom implements FullAtom, ContainerAtom, NestedAtom
     		
     		dataRef = AtomRegistry.createAtom(dataRefSize, dataRefName, dataRefPayload);
     		
-    		if (dataRef instanceof FullAtom)
+    		if (dataRef instanceof FullBox)
     		{
-    			dataRef = ((FullAtom) dataRef).parse();
+    			dataRef = ((Leaf) dataRef).parse();
     		}
     		
     		if (dataRef instanceof NestedAtom)
@@ -132,38 +133,39 @@ public class DrefAtom implements FullAtom, ContainerAtom, NestedAtom
     	return this;
     }
 
-    public GeneralAtom parentAtom() { return parentAtom; } 
+    public Box parentAtom() { return parentAtom; } 
     public int size() { return size; }
     public String name() { return name; }
     public short version() { return version; }
     public byte[] flags() { return flags; }
     public int entryCount() { return entryCount; }
-    public List<GeneralAtom> childAtoms() { return dataReferences; }
+    public List<Box> childAtoms() { return dataReferences; }
     public byte[] payload() { return payload; }
 	
-    public void setParent(GeneralAtom atom)
+    public void setParent(Box atom)
     {
     	this.parentAtom = atom;
     }
     
 	@Override
 	public String toString() {
-		return "DrefAtom [parentAtom=" + parentAtom + ", size=" + size + ", name=" + name + ", version=" + version
-				+ ", flags=" + Arrays.toString(flags) + ", entryCount=" + entryCount + ", dataReferences="
-				+ dataReferences + "]";
+		return "DrefAtom [size=" + size + ", name=" + name + ", version=" + version
+				+ ", flags=" + Arrays.toString(flags) + ", entryCount=" + entryCount + "]";
 	}
 
 	@Override
-	public int hashCode() {
+	public int hashCode() 
+	{
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + Arrays.hashCode(flags);
-		result = prime * result + Objects.hash(dataReferences, entryCount, name, parentAtom, size, version);
+		result = prime * result + Objects.hash(entryCount, name, size, version);
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(Object obj) 
+	{
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -171,8 +173,7 @@ public class DrefAtom implements FullAtom, ContainerAtom, NestedAtom
 		if (getClass() != obj.getClass())
 			return false;
 		DrefAtom other = (DrefAtom) obj;
-		return Objects.equals(dataReferences, other.dataReferences) && entryCount == other.entryCount
-				&& Arrays.equals(flags, other.flags) && Objects.equals(name, other.name)
-				&& Objects.equals(parentAtom, other.parentAtom) && size == other.size && version == other.version;
-	}
+		return entryCount == other.entryCount && Arrays.equals(flags, other.flags) && Objects.equals(name, other.name)
+				&& size == other.size && version == other.version;
+	}   
 }

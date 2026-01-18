@@ -2,13 +2,13 @@ package com.jd.majors.mp4_processor.AtomClasses.Classes;
 
 import java.util.Arrays;
 import java.util.Objects;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullAtom;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullBox;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
-
-public class CttsAtom implements FullAtom, NestedAtom
+public class CttsAtom implements FullBox, NestedAtom, Leaf
 {
-	private GeneralAtom parentAtom;
+	private Box parentAtom;
     private final int size;
     private final String name;
     private final short version;
@@ -18,7 +18,7 @@ public class CttsAtom implements FullAtom, NestedAtom
     private byte[] payload;
     
     public CttsAtom(int size, String name, short version, byte[] flags, int entryCount, long[][] entries,
-			byte[] payload) 
+				byte[] payload) 
     {
 		this.parentAtom = null;
 		this.size = size;
@@ -95,7 +95,7 @@ public class CttsAtom implements FullAtom, NestedAtom
     	return this;
     }
 
-    public GeneralAtom parentAtom() { return parentAtom; }
+    public Box parentAtom() { return parentAtom; }
     public int size() { return size; }
     public String name() { return name; }
     public short version() { return version; }
@@ -104,7 +104,7 @@ public class CttsAtom implements FullAtom, NestedAtom
 	public long[][] entries() { return entries; }
 	public byte[] payload() { return payload; }
 
-	public void setParent(GeneralAtom atom)
+	public void setParent(Box atom)
 	{
 		this.parentAtom = atom;
 	}
@@ -112,25 +112,23 @@ public class CttsAtom implements FullAtom, NestedAtom
 	@Override
 	public String toString() 
 	{
-		return "CttsAtom [parentAtom=" + parentAtom + ", size=" + size + ", name=" + name + ", version=" + version
+		return "CttsAtom [size=" + size + ", name=" + name + ", version=" + version
 				+ ", flags=" + Arrays.toString(flags) + ", entryCount=" + entryCount + ", entries="
 				+ Arrays.toString(entries) + "]";
 	}
 
 	@Override
-	public int hashCode() 
-	{
+	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + Arrays.deepHashCode(entries);
 		result = prime * result + Arrays.hashCode(flags);
-		result = prime * result + Objects.hash(entryCount, name, parentAtom, size, version);
+		result = prime * result + Objects.hash(entryCount, name, size, version);
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) 
-	{
+	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -139,9 +137,7 @@ public class CttsAtom implements FullAtom, NestedAtom
 			return false;
 		CttsAtom other = (CttsAtom) obj;
 		return Arrays.deepEquals(entries, other.entries) && entryCount == other.entryCount
-				&& Arrays.equals(flags, other.flags) && Objects.equals(name, other.name)
-				&& Objects.equals(parentAtom, other.parentAtom) && size == other.size && version == other.version;
+				&& Arrays.equals(flags, other.flags) && Objects.equals(name, other.name) && size == other.size
+				&& version == other.version;
 	}
-	
-	
 }

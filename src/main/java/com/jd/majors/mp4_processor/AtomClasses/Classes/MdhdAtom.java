@@ -2,8 +2,9 @@ package com.jd.majors.mp4_processor.AtomClasses.Classes;
 
 import java.util.Arrays;
 import java.util.Objects;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullAtom;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullBox;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
 /**
@@ -13,9 +14,9 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
  * - Creation/modification times and duration are version-dependent (32-bit vs 64-bit).
  * - Language is stored as three 5-bit characters per ISO spec and decoded during parsing.
  */
-public class MdhdAtom implements FullAtom, NestedAtom 
+public class MdhdAtom implements FullBox, NestedAtom , Leaf
 {
-	private GeneralAtom parentAtom;
+	private Box parentAtom;
 	private final int size;
     private final String name;
     private final short version;
@@ -27,10 +28,10 @@ public class MdhdAtom implements FullAtom, NestedAtom
     private String language;
     private byte[] payload;
     
-    public MdhdAtom(GeneralAtom parentAtom, int size, String name, short version, byte[] flags, long creationTime, long modificationTime,
+    public MdhdAtom(int size, String name, short version, byte[] flags, long creationTime, long modificationTime,
 			long timescale, long duration, String language) 
     {
-    	this.parentAtom = parentAtom;
+    	this.parentAtom = null;
 		this.size = size;
 		this.name = name;
 		this.version = version;
@@ -132,7 +133,7 @@ public class MdhdAtom implements FullAtom, NestedAtom
     	return this;
     }
 
-    public GeneralAtom parentAtom() { return parentAtom; }
+    public Box parentAtom() { return parentAtom; }
 	public int size() { return size; }
 	public String name() { return name; }
 	public short version() { return version; }
@@ -143,7 +144,7 @@ public class MdhdAtom implements FullAtom, NestedAtom
 	public long duration() { return duration; }
 	public String language() { return language; }
 
-	public void setParent(GeneralAtom atom)
+	public void setParent(Box atom)
 	{
 		this.parentAtom = atom;
 	}
@@ -157,8 +158,7 @@ public class MdhdAtom implements FullAtom, NestedAtom
 	}
 
 	@Override
-	public int hashCode() 
-	{
+	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + Arrays.hashCode(flags);
@@ -168,8 +168,7 @@ public class MdhdAtom implements FullAtom, NestedAtom
 	}
 
 	@Override
-	public boolean equals(Object obj) 
-	{
+	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -182,6 +181,4 @@ public class MdhdAtom implements FullAtom, NestedAtom
 				&& Objects.equals(name, other.name) && size == other.size && timescale == other.timescale
 				&& version == other.version;
 	}
-
-    
 }

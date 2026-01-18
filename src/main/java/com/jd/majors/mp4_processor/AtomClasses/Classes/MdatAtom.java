@@ -1,10 +1,10 @@
 package com.jd.majors.mp4_processor.AtomClasses.Classes;
 
 import java.util.Objects;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.BasicAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.TopLevelAtom;
 
-public class MdatAtom implements BasicAtom, TopLevelAtom
+public class MdatAtom implements Leaf, TopLevelAtom
 {
     private final int size;
     private final String name;
@@ -17,13 +17,18 @@ public class MdatAtom implements BasicAtom, TopLevelAtom
         this.payload = payload;
     }
 
-    public void parse() throws Exception
+    public MdatAtom parse() throws Exception
     {
         if (payload == null)
         {
             throw new Exception("Empty Payload - Cannot parse");
         }
+        
+        // avc codec data - parsing in future
+        
         payload = null;
+        
+        return this;
     }
     
     public int size() { return size; }

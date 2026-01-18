@@ -5,7 +5,7 @@ package com.jd.majors.mp4_processor.AtomClasses.Interfaces;
  * version/flags. These are generally top-level or payload-bearing atoms
  * where the payload is interpreted by parse().
  */
-public non-sealed interface BasicAtom extends GeneralAtom
+public non-sealed interface Leaf extends Box
 {
-	void parse() throws Exception;
+	Box parse() throws Exception;
 }

@@ -2,25 +2,26 @@ package com.jd.majors.mp4_processor.AtomClasses.Classes;
 
 import java.util.Arrays;
 import java.util.Objects;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullAtom;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullBox;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
-public class HdlrAtom implements FullAtom, NestedAtom 
+public class HdlrAtom implements FullBox, NestedAtom, Leaf
 {
-	private GeneralAtom parentAtom;
-    private final int size;
-    private final String name;
-    private final short version;
-    private final byte[] flags;
-    private String handlerType;
-    private String handlerName;
-    private byte[] payload;
+	private Box parentAtom;
+	private final int size;
+	private final String name;
+	private final short version;
+	private final byte[] flags;
+	private String handlerType;
+	private String handlerName;
+	private byte[] payload;
 
-    public HdlrAtom(GeneralAtom parentAtom, int size, String name, short version, byte[] flags, String handlerType, String handlerName,
-				byte[] payload) 
-    {
-		this.parentAtom = parentAtom;
+	public HdlrAtom(int size, String name, short version, byte[] flags, String handlerType, String handlerName,
+			byte[] payload) 
+	{
+		this.parentAtom = null;
 		this.size = size;
 		this.name = name;
 		this.version = version;
@@ -31,58 +32,56 @@ public class HdlrAtom implements FullAtom, NestedAtom
 	}
 
 	public HdlrAtom(int s, String n, short version, byte[] f, byte[] payload) 
-    {
+	{
 		this.parentAtom =  null;
-        this.size = s;
-        this.name = n;
-        this.version = version;
-        this.flags = f;
-        this.handlerType = "";
-        this.handlerName = "";
-        this.payload = payload;
-    }
+		this.size = s;
+		this.name = n;
+		this.version = version;
+		this.flags = f;
+		this.handlerType = "";
+		this.handlerName = "";
+		this.payload = payload;
+	}
 
-    public HdlrAtom(int s, String n, byte[] payload) 
-    {
-     this.parentAtom = null;
-        this.size = s;
-        this.name = n;
-        this.version = payload[0];
-        this.flags = Arrays.copyOfRange(payload, 1, 4);
-        this.handlerType = "";
-        this.handlerName = "";
-        this.payload = Arrays.copyOfRange(payload, 4, payload.length);
-    }
-    
-    // TODO fill this out
-    public HdlrAtom parse() throws Exception 
-    {
-     if (payload == null)
-     {
-      throw new Exception("Empty Payload - Cannot parse");
-     }
-     
-     // handlerType lives at original payload bytes 8..11; after stripping first 4 bytes, it's at 4..7
-     handlerType = new String(Arrays.copyOfRange(payload, 4, 8));
-     
-     int payloadPointer = 16; // name starts at original offset 20, which is 16 after we've stripped the first 4 bytes
-     // guard: ensure pointer within bounds
-     if (payloadPointer >= payload.length) {
-         handlerName = "";
-     } else {
-         int nameEnd = payloadPointer;
-         while (nameEnd < payload.length && payload[nameEnd] != 0x00) {
-             nameEnd++;
-         }
-         handlerName = new String(Arrays.copyOfRange(payload, payloadPointer, nameEnd));
-     }
-     
-     payload = null;
-     
-     return this;
-    }
+	public HdlrAtom(int s, String n, byte[] payload) 
+	{
+		this.parentAtom = null;
+		this.size = s;
+		this.name = n;
+		this.version = payload[0];
+		this.flags = Arrays.copyOfRange(payload, 1, 4);
+		this.handlerType = "";
+		this.handlerName = "";
+		this.payload = Arrays.copyOfRange(payload, 4, payload.length);
+	}
 
-    public GeneralAtom parentAtom() { return parentAtom; }
+	// TODO fill this out
+	public HdlrAtom parse() throws Exception 
+	{
+		if (payload == null)
+		{
+			throw new Exception("Empty Payload - Cannot parse");
+		}
+
+		payload = Arrays.copyOfRange(payload, 4, payload.length); // strip first 4 bytes (pre-defined)
+
+		handlerType = new String(Arrays.copyOfRange(payload, 0, 4));
+
+		payload = Arrays.copyOfRange(payload, 16, payload.length); // strip handler type and reserved bytes
+
+		// guard: ensure pointer within bounds
+		int payloadPointer = 0;
+		while (payload[payloadPointer] != 0x00 && payloadPointer < payload.length)
+		{
+			handlerName = handlerName + (char) payload[payloadPointer];
+			payloadPointer++;
+		}
+		payload = null;
+
+		return this;
+	}
+
+	public Box parentAtom() { return parentAtom; }
 	public int size() { return size; }
 	public String name() { return name; }
 	public short version() { return version; }
@@ -90,11 +89,11 @@ public class HdlrAtom implements FullAtom, NestedAtom
 	public String handlerType() { return handlerType; }
 	public String handlerName() { return handlerName; }
 
-	public void setParent(GeneralAtom atom)
+	public void setParent(Box atom)
 	{
 		this.parentAtom = atom;
 	}
-	
+
 	@Override
 	public String toString() 
 	{
@@ -103,8 +102,7 @@ public class HdlrAtom implements FullAtom, NestedAtom
 	}
 
 	@Override
-	public int hashCode() 
-	{
+	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + Arrays.hashCode(flags);
@@ -113,8 +111,7 @@ public class HdlrAtom implements FullAtom, NestedAtom
 	}
 
 	@Override
-	public boolean equals(Object obj) 
-	{
+	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

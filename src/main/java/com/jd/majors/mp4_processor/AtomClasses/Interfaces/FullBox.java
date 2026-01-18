@@ -6,9 +6,8 @@ package com.jd.majors.mp4_processor.AtomClasses.Interfaces;
  * must provide accessors for the version/flags and a parse() that returns the
  * typed FullAtom after decoding its payload.
  */
-public non-sealed interface FullAtom extends GeneralAtom 
+public non-sealed interface FullBox extends Box 
 {
 	short version(); 
 	byte[] flags();
-	FullAtom parse() throws Exception;
 }

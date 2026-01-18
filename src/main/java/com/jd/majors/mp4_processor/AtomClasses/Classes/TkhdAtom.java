@@ -3,8 +3,9 @@ package com.jd.majors.mp4_processor.AtomClasses.Classes;
 import java.util.Arrays;
 import java.util.Objects;
 
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullAtom;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullBox;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
 /**
@@ -14,9 +15,9 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
  * - Several fields are version-dependent (timestamps and duration).
  * - Parses the track header and then clears payload to prevent re-parsing.
  */
-public class TkhdAtom implements FullAtom, NestedAtom 
+public class TkhdAtom implements FullBox, NestedAtom, Leaf
 {
-	private GeneralAtom parentAtom;
+	private Box parentAtom;
     private final int size;
     private final String name;
     private final short version;
@@ -33,11 +34,11 @@ public class TkhdAtom implements FullAtom, NestedAtom
     private long height;
     private byte[] payload;
 
-	public TkhdAtom(GeneralAtom parentAtom, int size, String name, short version, byte[] flags, long creationTime, long modificationTime,
+	public TkhdAtom(int size, String name, short version, byte[] flags, long creationTime, long modificationTime,
 			long trackID, long duration, int layer, int alternateGroup, int volume, byte[][] matrix, long width,
 			long height, byte[] payload) 
 	{
-		this.parentAtom = parentAtom;
+		this.parentAtom = null;
 		this.size = size;
 		this.name = name;
 		this.version = version;
@@ -166,7 +167,7 @@ public class TkhdAtom implements FullAtom, NestedAtom
     	return this;
     }
 
-    public GeneralAtom parentAtom() { return parentAtom; }
+    public Box parentAtom() { return parentAtom; }
 	public int size() { return size; }
 	public String name() { return name; }
 	public short version() { return version; }
@@ -182,7 +183,7 @@ public class TkhdAtom implements FullAtom, NestedAtom
 	public long width() { return width; }
 	public long height() { return height; }
 
-	public void setParent(GeneralAtom atom)
+	public void setParent(Box atom)
 	{
 		this.parentAtom = atom;
 	}
@@ -198,8 +199,7 @@ public class TkhdAtom implements FullAtom, NestedAtom
 	}
 
 	@Override
-	public int hashCode() 
-	{
+	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + Arrays.hashCode(flags);
@@ -210,8 +210,7 @@ public class TkhdAtom implements FullAtom, NestedAtom
 	}
 
 	@Override
-	public boolean equals(Object obj) 
-	{
+	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -226,6 +225,6 @@ public class TkhdAtom implements FullAtom, NestedAtom
 				&& trackID == other.trackID && version == other.version && volume == other.volume
 				&& width == other.width;
 	}
-    
+
 	
 }

@@ -3,10 +3,10 @@ package com.jd.majors.mp4_processor.AtomClasses.Classes;
 import java.util.Arrays;
 import java.util.Objects;
 
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.BasicAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.TopLevelAtom;
 
-public class FtypAtom implements BasicAtom, TopLevelAtom
+public class FtypAtom implements Leaf, TopLevelAtom
 {
     private int size;
     private final String name;
@@ -36,7 +36,7 @@ public class FtypAtom implements BasicAtom, TopLevelAtom
         this.payload = payload;
     }
 
-    public void parse() throws Exception
+    public FtypAtom parse() throws Exception
     {
         if (payload == null)
         {
@@ -64,6 +64,8 @@ public class FtypAtom implements BasicAtom, TopLevelAtom
         
         // not allow parsing of atom multiple times
         payload = null;
+        
+        return this;
     }
     
     public int size() { return size; }
@@ -78,20 +80,27 @@ public class FtypAtom implements BasicAtom, TopLevelAtom
         return "FtypAtom [size=" + size + ", name=" + name + ", majorBrand=" + majorBrand + ", minorVersion=" + minorVersion + ", compatibleBrands=" + Arrays.toString(compatibleBrands) + "]";
     }
 
-    @Override
-    public int hashCode() 
-    {
-        return Objects.hash(size, name, majorBrand, minorVersion, Arrays.hashCode(compatibleBrands));
-    }
+	@Override
+	public int hashCode() 
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(compatibleBrands);
+		result = prime * result + Objects.hash(majorBrand, minorVersion, name, size);
+		return result;
+	}
 
-    @Override
-    public boolean equals(Object obj) 
-    {
-        if (this == obj) return true;
-        if (!(obj instanceof FtypAtom)) return false;
-        FtypAtom other = (FtypAtom) obj;
-        return size == other.size && Objects.equals(name, other.name)
-            && Objects.equals(majorBrand, other.majorBrand) && minorVersion == other.minorVersion
-            && Arrays.equals(compatibleBrands, other.compatibleBrands);
-    }
+	@Override
+	public boolean equals(Object obj) 
+	{
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		FtypAtom other = (FtypAtom) obj;
+		return Arrays.equals(compatibleBrands, other.compatibleBrands) && Objects.equals(majorBrand, other.majorBrand)
+				&& minorVersion == other.minorVersion && Objects.equals(name, other.name) && size == other.size;
+	}
 }

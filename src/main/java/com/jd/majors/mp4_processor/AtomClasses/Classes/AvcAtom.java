@@ -3,13 +3,14 @@ package com.jd.majors.mp4_processor.AtomClasses.Classes;
 import java.util.Arrays;
 import java.util.Objects;
 
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullAtom;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullBox;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
-public class AvcAtom implements FullAtom, NestedAtom
+public class AvcAtom implements FullBox, NestedAtom, Leaf
 {
-	private GeneralAtom parentAtom;
+	private Box parentAtom;
     private final int size;
     private final String name;
     private final short version;
@@ -46,28 +47,40 @@ public class AvcAtom implements FullAtom, NestedAtom
         return this;
     }
     
-    public GeneralAtom parentAtom() { return parentAtom; }
+    public Box parentAtom() { return parentAtom; }
     public int size() { return size; }
     public String name() { return name; }
     public short version() { return version; }
     public byte[] flags() { return flags; }    
     public byte[] payload() { return payload; }
     
-    public void setParent(GeneralAtom atom)
+    public void setParent(Box atom)
     {
     	this.parentAtom = atom;
     }
     @Override
-    public String toString() { return "AvcAtom [parentAtom=" + parentAtom + ", size=" + size + ", name=" + name + ", version=" + version + ", flags=" + Arrays.toString(flags) + "]"; }
-    @Override
-    public int hashCode() { return Objects.hash(parentAtom, size, name, version, Arrays.hashCode(flags)); }
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        AvcAtom other = (AvcAtom) obj;
-        return Objects.equals(parentAtom, other.parentAtom) && size == other.size && Objects.equals(name, other.name)
-            && version == other.version && Arrays.equals(flags, other.flags);
-    }
+    public String toString() { return "AvcAtom [size=" + size + ", name=" + name + ", version=" + version + ", flags=" + Arrays.toString(flags) + "]"; }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(flags);
+		result = prime * result + Objects.hash(name, size, version);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) 
+	{
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AvcAtom other = (AvcAtom) obj;
+		return Arrays.equals(flags, other.flags) && Objects.equals(name, other.name) && size == other.size
+				&& version == other.version;
+	}
 }

@@ -2,13 +2,14 @@ package com.jd.majors.mp4_processor.AtomClasses.Classes;
 
 import java.util.Arrays;
 import java.util.Objects;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullAtom;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullBox;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
-public class ElstAtom implements FullAtom, NestedAtom
+public class ElstAtom implements FullBox, NestedAtom, Leaf
 {
-	private GeneralAtom parentAtom;
+	private Box parentAtom;
     private final int size;
     private final String name;
     private final short version;
@@ -17,8 +18,8 @@ public class ElstAtom implements FullAtom, NestedAtom
     private long[][] entries;
     private byte[] payload;
 
-    public ElstAtom(GeneralAtom parentAtom, int size, String name, short version, byte[] flags, int entryCount, long[][] entries,
-			byte[] payload) 
+    public ElstAtom(Box parentAtom, int size, String name, short version, byte[] flags, int entryCount, long[][] entries,
+				byte[] payload) 
     {
 		this.parentAtom = parentAtom;
 		this.size = size;
@@ -84,7 +85,7 @@ public class ElstAtom implements FullAtom, NestedAtom
         	}
         		
         	// media time
-        	eightMultiple = 3;
+        	 eightMultiple = 3;
         	for (int j = 4; j < 8; j++)
         	{
         		entries[entriesPointer][1] = entries[entriesPointer][1] | (payload[i + j] & 0xFF) << 8 * eightMultiple;
@@ -92,7 +93,7 @@ public class ElstAtom implements FullAtom, NestedAtom
         	}
         		
         	// media rate
-        	eightMultiple = 1;
+        	 eightMultiple = 1;
         	for (int j = 8; j < 10; j++)
         	{
         		entries[entriesPointer][2] = entries[entriesPointer][2] | (payload[i + j] & 0xFF) << 8 * eightMultiple;
@@ -100,7 +101,7 @@ public class ElstAtom implements FullAtom, NestedAtom
         	}
         		
         	// media rate fraction
-        	eightMultiple = 1;
+        	 eightMultiple = 1;
         	for (int j = 10; j < 12; j++)
         	{
         		entries[entriesPointer][3] = entries[entriesPointer][3] | (payload[i + j] & 0xFF) << 8 * eightMultiple;
@@ -116,7 +117,7 @@ public class ElstAtom implements FullAtom, NestedAtom
         return this;
     }
 
-    public GeneralAtom parentAtom() { return parentAtom; }
+    public Box parentAtom() { return parentAtom; }
 	public int size() { return size; }
 	public String name() { return name; }
 	public short version() { return version; }
@@ -124,7 +125,7 @@ public class ElstAtom implements FullAtom, NestedAtom
 	public int entryCount() { return entryCount; }
 	public long[][] entries() { return entries; }
 
-	public void setParent(GeneralAtom atom)
+	public void setParent(Box atom)
 	{
 		this.parentAtom = atom;
 	}
@@ -132,7 +133,7 @@ public class ElstAtom implements FullAtom, NestedAtom
 	@Override
 	public String toString() 
 	{
-		return "ElstAtom [parentAtom=" + parentAtom + ", size=" + size + ", name=" + name + ", version=" + version + ", flags="
+		return "ElstAtom [size=" + size + ", name=" + name + ", version=" + version + ", flags="
 				+ Arrays.toString(flags) + ", entryCount=" + entryCount + ", entries=" + Arrays.toString(entries) + "]";
 	}
 
@@ -143,7 +144,7 @@ public class ElstAtom implements FullAtom, NestedAtom
 		int result = 1;
 		result = prime * result + Arrays.deepHashCode(entries);
 		result = prime * result + Arrays.hashCode(flags);
-		result = prime * result + Objects.hash(entryCount, name, parentAtom, size, version);
+		result = prime * result + Objects.hash(entryCount, name, size, version);
 		return result;
 	}
 
@@ -159,8 +160,6 @@ public class ElstAtom implements FullAtom, NestedAtom
 		ElstAtom other = (ElstAtom) obj;
 		return Arrays.deepEquals(entries, other.entries) && entryCount == other.entryCount
 				&& Arrays.equals(flags, other.flags) && Objects.equals(name, other.name) && size == other.size
-				&& version == other.version && Objects.equals(parentAtom, other.parentAtom);
+				&& version == other.version;
 	}
-
-    
 }

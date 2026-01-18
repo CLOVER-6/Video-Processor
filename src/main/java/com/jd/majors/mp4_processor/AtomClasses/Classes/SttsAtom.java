@@ -2,13 +2,14 @@ package com.jd.majors.mp4_processor.AtomClasses.Classes;
 
 import java.util.Arrays;
 import java.util.Objects;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullAtom;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullBox;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
-public class SttsAtom implements FullAtom, NestedAtom
+public class SttsAtom implements FullBox, NestedAtom, Leaf
 {
-	private GeneralAtom parentAtom;
+	private Box parentAtom;
 	private final int size;
 	private final String name;
 	private final short version;
@@ -18,7 +19,7 @@ public class SttsAtom implements FullAtom, NestedAtom
 	private byte[] payload;
 
 	public SttsAtom(int size, String name, short version, byte[] flags, int entryCount,
-			int[][] sampleEntries) 
+				int[][] sampleEntries) 
 	{
 		this.size = size;
 		this.name = name;
@@ -64,7 +65,7 @@ public class SttsAtom implements FullAtom, NestedAtom
 		{
 			entryCount = entryCount | (payload[i] & 0xFF) << 8 * eightMultiple;
 			eightMultiple = eightMultiple - 1;
-		} 
+		}
 
 		sampleEntries = new int[entryCount][2];
 		
@@ -97,7 +98,7 @@ public class SttsAtom implements FullAtom, NestedAtom
 		return this;
 	}
 
-	public GeneralAtom parentAtom() { return parentAtom; }
+	public Box parentAtom() { return parentAtom; }
 	public int size() { return size; }
 	public String name() { return name; }
 	public short version() { return version; }
@@ -106,14 +107,14 @@ public class SttsAtom implements FullAtom, NestedAtom
 	public int[][] sampleEntries() { return sampleEntries; }
 	public byte[] payload() { return payload; }
 
-	public void setParent(GeneralAtom atom)
+	public void setParent(Box atom)
 	{
 		this.parentAtom = atom;
 	}
 
 	@Override
 	public String toString() {
-		return "SttsAtom [parentAtom=" + parentAtom + ", size=" + size + ", name=" + name + ", version=" + version
+		return "SttsAtom [size=" + size + ", name=" + name + ", version=" + version
 				+ ", flags=" + Arrays.toString(flags) + ", entryCount=" + entryCount + ", sampleEntries="
 				+ Arrays.toString(sampleEntries) + "]";
 	}
@@ -124,7 +125,7 @@ public class SttsAtom implements FullAtom, NestedAtom
 		int result = 1;
 		result = prime * result + Arrays.hashCode(flags);
 		result = prime * result + Arrays.deepHashCode(sampleEntries);
-		result = prime * result + Objects.hash(entryCount, name, parentAtom, size, version);
+		result = prime * result + Objects.hash(entryCount, name, size, version);
 		return result;
 	}
 
@@ -138,7 +139,9 @@ public class SttsAtom implements FullAtom, NestedAtom
 			return false;
 		SttsAtom other = (SttsAtom) obj;
 		return entryCount == other.entryCount && Arrays.equals(flags, other.flags) && Objects.equals(name, other.name)
-				&& Objects.equals(parentAtom, other.parentAtom) && Arrays.deepEquals(sampleEntries, other.sampleEntries)
-				&& size == other.size && version == other.version;
+				&& Arrays.deepEquals(sampleEntries, other.sampleEntries) && size == other.size
+				&& version == other.version;
 	}
+
+	
 }

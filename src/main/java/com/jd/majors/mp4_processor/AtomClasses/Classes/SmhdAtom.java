@@ -2,27 +2,28 @@ package com.jd.majors.mp4_processor.AtomClasses.Classes;
 
 import java.util.Arrays;
 import java.util.Objects;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullAtom;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullBox;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
-public class SmhdAtom implements FullAtom, NestedAtom
+public class SmhdAtom implements FullBox, NestedAtom, Leaf
 {
-	private GeneralAtom parentAtom;
+	private Box parentAtom;
     private final int size;
     private final String name;
     private final short version;
     private final byte[] flags;
     private byte[] payload;
 
-    public SmhdAtom(GeneralAtom parentAtom, int s, String n, short version, byte[] f, byte[] payload) 
+    public SmhdAtom(int s, String n, short version, byte[] f, byte[] payload) 
     {
-    	this.parentAtom = parentAtom;
+    	this.parentAtom = null;
         this.size = s;
         this.name = n;
         this.version = version;
         this.flags = f;
-        this.payload = null; // full-value constructor should not keep payload
+        this.payload = null;
     }
 
     public SmhdAtom(int s, String n, byte[] payload) 
@@ -32,7 +33,7 @@ public class SmhdAtom implements FullAtom, NestedAtom
         this.name = n;
         this.version = payload[0];
         this.flags = Arrays.copyOfRange(payload, 1, 4);
-        this.payload = Arrays.copyOfRange(payload, 4, payload.length); // fixed start index
+        this.payload = Arrays.copyOfRange(payload, 4, payload.length);
     }
 
     public SmhdAtom parse() throws Exception
@@ -41,19 +42,20 @@ public class SmhdAtom implements FullAtom, NestedAtom
         {
             throw new Exception("Empty Payload - Cannot parse");
         }
-        // no additional parsing here; clear payload
+        // parsing logic would go here
+        // audio shit
         payload = null;
         return this;
     }    
     
-    public GeneralAtom parentAtom() { return parentAtom; }
+    public Box parentAtom() { return parentAtom; }
     public int size() { return size; }
     public String name() { return name; }
     public short version() { return version; }
     public byte[] flags() { return flags; }
     public byte[] payload() { return payload; }
 
-    public void setParent(GeneralAtom atom)
+    public void setParent(Box atom)
     {
     	this.parentAtom = atom;
     }
@@ -61,23 +63,31 @@ public class SmhdAtom implements FullAtom, NestedAtom
     @Override
     public String toString() 
     {
-        return "SmhdAtom [parentAtom=" + parentAtom + ", size=" + size + ", name=" + name + ", version=" + version +
+        return "SmhdAtom [size=" + size + ", name=" + name + ", version=" + version +
                ", flags=" + Arrays.toString(flags) + "]";
     }
 
-    @Override
-    public int hashCode() 
-    {
-        return Objects.hash(size, name, version, Arrays.hashCode(flags));
-    }
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(flags);
+		result = prime * result + Objects.hash(name, size, version);
+		return result;
+	}
 
-    @Override
-    public boolean equals(Object obj) 
-    {
-        if (this == obj) return true;
-        if (!(obj instanceof SmhdAtom)) return false;
-        SmhdAtom other = (SmhdAtom) obj;
-        return size == other.size && version == other.version && Arrays.equals(flags, other.flags)
-            && Objects.equals(name, other.name);
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SmhdAtom other = (SmhdAtom) obj;
+		return Arrays.equals(flags, other.flags) && Objects.equals(name, other.name) && size == other.size
+				&& version == other.version;
+	}
+
+	
 }

@@ -30,13 +30,13 @@ public class AtomRegistry
 	}
 	
 	// give atom to user
-	public static GeneralAtom createAtom(int size, String name, byte[] payload)
+	public static Box createAtom(int size, String name, byte[] payload)
 	{
 		AtomFactory atomFactory = registry.get(name);
 		
 		if (atomFactory != null)
 		{
-			GeneralAtom atom = atomFactory.createAtom(size, name, payload);
+			Box atom = atomFactory.createAtom(size, name, payload);
 			return atom;
 		}
 		else
@@ -87,6 +87,7 @@ public class AtomRegistry
         // User data / metadata
         registerAtom("udta", (s, n, p) -> new UdtaAtom(s, n, p));
         registerAtom("meta", (s, n, p) -> new MetaAtom(s, n, p));
+        registerAtom("ilst", (s, n, p) -> new IlstAtom(s, n, p));
 
     }
     

@@ -4,18 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.ContainerAtom;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.ContainerBox;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
-public class IlstAtom implements ContainerAtom, NestedAtom
+public class IlstAtom implements ContainerBox, NestedAtom
 {
-	private GeneralAtom parentAtom;
+	private Box parentAtom;
     private final int size;
     private final String name;
-    private final List<GeneralAtom> childAtoms;
+    private final List<Box> childAtoms;
     
-    public IlstAtom(int size, String name, List<GeneralAtom> childAtoms) 
+    public IlstAtom(int size, String name, List<Box> childAtoms) 
     {
     	this.parentAtom = null;
         this.size = size;
@@ -28,7 +28,7 @@ public class IlstAtom implements ContainerAtom, NestedAtom
     	this.parentAtom = null;
         this.size = size;
         this.name = name;
-        this.childAtoms = new ArrayList<GeneralAtom>();
+        this.childAtoms = new ArrayList<Box>();
     }
 
     public void addAtom(NestedAtom atom)
@@ -37,12 +37,12 @@ public class IlstAtom implements ContainerAtom, NestedAtom
     	childAtoms.add(atom);
     }
     
-    public GeneralAtom parentAtom() { return parentAtom; }
+    public Box parentAtom() { return parentAtom; }
     public int size() { return size; }
     public String name() { return name; }
-    public List<GeneralAtom> childAtoms() { return childAtoms; }
+    public List<Box> childAtoms() { return childAtoms; }
 
-    public void setParent(GeneralAtom atom)
+    public void setParent(Box atom)
     {
     	this.parentAtom = atom;
     }
@@ -50,19 +50,16 @@ public class IlstAtom implements ContainerAtom, NestedAtom
 	@Override
 	public String toString() 
 	{
-		return "IlstAtom [parentAtom=" + parentAtom + ", size=" + size + ", name=" + name + ", childAtoms=" + childAtoms
-				+ "]";
+		return "IlstAtom [size=" + size + ", name=" + name + "]";
 	}
 
 	@Override
-	public int hashCode() 
-	{
-		return Objects.hash(childAtoms, name, parentAtom, size);
+	public int hashCode() {
+		return Objects.hash(name, size);
 	}
 
 	@Override
-	public boolean equals(Object obj) 
-	{
+	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -70,9 +67,6 @@ public class IlstAtom implements ContainerAtom, NestedAtom
 		if (getClass() != obj.getClass())
 			return false;
 		IlstAtom other = (IlstAtom) obj;
-		return Objects.equals(childAtoms, other.childAtoms) && Objects.equals(name, other.name)
-				&& Objects.equals(parentAtom, other.parentAtom) && size == other.size;
+		return Objects.equals(name, other.name) && size == other.size;
 	}
-    
-    
 }

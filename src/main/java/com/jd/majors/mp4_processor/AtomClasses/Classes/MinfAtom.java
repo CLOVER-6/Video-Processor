@@ -3,18 +3,18 @@ package com.jd.majors.mp4_processor.AtomClasses.Classes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.ContainerAtom;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.GeneralAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.ContainerBox;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
-public class MinfAtom implements ContainerAtom, NestedAtom 
+public class MinfAtom implements ContainerBox, NestedAtom 
 {
-	private GeneralAtom parentAtom;
+	private Box parentAtom;
     private final int size;
     private final String name;
-    private final List<GeneralAtom> childAtoms;
+    private final List<Box> childAtoms;
 
-    public MinfAtom(int size, String name, List<GeneralAtom> childAtoms) 
+    public MinfAtom(int size, String name, List<Box> childAtoms) 
     {
     	this.parentAtom = null;
         this.size = size;
@@ -27,7 +27,7 @@ public class MinfAtom implements ContainerAtom, NestedAtom
     	this.parentAtom = null;
         this.size = size;
         this.name = name;
-        this.childAtoms = new ArrayList<GeneralAtom>();
+        this.childAtoms = new ArrayList<Box>();
     }
     
     public void addAtom(NestedAtom atom)
@@ -36,12 +36,12 @@ public class MinfAtom implements ContainerAtom, NestedAtom
     	childAtoms.add(atom);
     }
 
-    public GeneralAtom parentAtom() { return parentAtom; }
+    public Box parentAtom() { return parentAtom; }
     public int size() { return size; }
     public String name() { return name; }
-    public List<GeneralAtom> childAtoms() { return childAtoms; }
+    public List<Box> childAtoms() { return childAtoms; }
 
-    public void setParent(GeneralAtom atom)
+    public void setParent(Box atom)
     {
     	this.parentAtom = atom;
     }
@@ -49,22 +49,27 @@ public class MinfAtom implements ContainerAtom, NestedAtom
     @Override
     public String toString() 
     {
-        return "MinfAtom [size=" + size + ", name=" + name + ", childAtoms=" + childAtoms + "]";
+        return "MinfAtom [size=" + size + ", name=" + name + "]";
     }
 
-    @Override
-    public int hashCode() 
-    {
-        return Objects.hash(size, name, childAtoms);
-    }
+	@Override
+	public int hashCode() 
+	{
+		return Objects.hash(name, size);
+	}
 
-    @Override
-    public boolean equals(Object obj) 
-    {
-        if (this == obj) return true;
-        if (!(obj instanceof MinfAtom)) return false;
-        MinfAtom other = (MinfAtom) obj;
-        return size == other.size && Objects.equals(name, other.name) &&
-               Objects.equals(childAtoms, other.childAtoms);
-    }
+	@Override
+	public boolean equals(Object obj) 
+	{
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MinfAtom other = (MinfAtom) obj;
+		return Objects.equals(name, other.name) && size == other.size;
+	}
+
+   
 }
