@@ -3,7 +3,10 @@ package com.jd.majors.mp4_processor.Parsing;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -148,9 +151,17 @@ public class Mp4File
 			if (atom instanceof NestedAtom)
 			{
 				List<ContainerBox> containerAtomsList = new java.util.ArrayList<ContainerBox>(containerAtoms.keySet());
-				containerAtomsList = containerAtomsList.reversed(); // reverse to check innermost containers first
+				List<ContainerBox> containerAtomsListReversed = new java.util.ArrayList<ContainerBox>();
+				
+				// reverse to check innermost containers first
+				for (ContainerBox box : containerAtomsList)
+				{
+					containerAtomsListReversed.add(box); 
+				}
+				Collections.reverse(containerAtomsListReversed);
+				
 				// nesting management
-				for (ContainerBox containerAtom : containerAtomsList)
+				for (ContainerBox containerAtom : containerAtomsListReversed)
 				{
 					int containerEnd = containerAtoms.get(containerAtom);
 					// stopping condition: offset is within container range and not the same atom
