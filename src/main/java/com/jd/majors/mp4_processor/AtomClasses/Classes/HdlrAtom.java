@@ -1,5 +1,6 @@
 package com.jd.majors.mp4_processor.AtomClasses.Classes;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullBox;
@@ -65,7 +66,7 @@ public class HdlrAtom implements FullBox, NestedAtom, Leaf
 
 		payload = Arrays.copyOfRange(payload, 4, payload.length); // strip first 4 bytes (pre-defined)
 
-		handlerType = new String(Arrays.copyOfRange(payload, 0, 4));
+		handlerType = new String(Arrays.copyOfRange(payload, 0, 4), StandardCharsets.ISO_8859_1);
 
 		payload = Arrays.copyOfRange(payload, 16, payload.length); // strip handler type and reserved bytes
 

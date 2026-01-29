@@ -41,7 +41,7 @@ public class AtomRegistry
 		}
 		else
 		{
-			return new AvcAtom(size, name, payload);
+			return null;
 		}
 	}
 	
@@ -74,6 +74,7 @@ public class AtomRegistry
         registerAtom("url\u0020", (s, n, p) -> new UrxAtom(s, n, p));
         registerAtom("urn\u0020", (s, n, p) -> new UrxAtom(s, n, p));
         registerAtom("vmhd", (s, n, p) -> new VmhdAtom(s, n, p));
+        registerAtom("smhd", (s, n, p) -> new SmhdAtom(s, n, p));
 
         // Sample tables
         registerAtom("stbl", (s, n, p) -> new StblAtom(s, n, p));
@@ -90,7 +91,7 @@ public class AtomRegistry
         registerAtom("udta", (s, n, p) -> new UdtaAtom(s, n, p));
         registerAtom("meta", (s, n, p) -> new MetaAtom(s, n, p));
         registerAtom("ilst", (s, n, p) -> new IlstAtom(s, n, p));
-
+        registerAtom("iods", (s, n, p) -> new IodsAtom(s, n, p));
     }
     
     // prevents object instantiation

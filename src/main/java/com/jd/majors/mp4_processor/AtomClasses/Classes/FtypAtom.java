@@ -1,5 +1,6 @@
 package com.jd.majors.mp4_processor.AtomClasses.Classes;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -43,7 +44,7 @@ public class FtypAtom implements Leaf, TopLevelAtom
             throw new Exception("Empty Payload - Cannot parse");
         }
         
-        majorBrand = new String(Arrays.copyOfRange(payload, 0, 4));
+        majorBrand = new String(Arrays.copyOfRange(payload, 0, 4), StandardCharsets.ISO_8859_1);
         
         int eightMultiple = 3;
         for (int i = 4; i < 8; i++)
@@ -58,7 +59,7 @@ public class FtypAtom implements Leaf, TopLevelAtom
         int cbPointer = 0;
         for (int i = 8; i < payload.length; i = i + 4)
         {
-            compatibleBrands[cbPointer] = new String(Arrays.copyOfRange(payload, i, i + 4));
+            compatibleBrands[cbPointer] = new String(Arrays.copyOfRange(payload, i, i + 4), StandardCharsets.ISO_8859_1);
             cbPointer = cbPointer + 1;
         }
         

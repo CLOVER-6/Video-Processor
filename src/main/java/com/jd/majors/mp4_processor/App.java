@@ -58,12 +58,19 @@ public class App
 	public static void main( String[] args ) throws Exception
 	{
 		// Open a file for read and write
-		RandomAccessFile file = new RandomAccessFile("/home/jd/eclipse-workspace/mp4-processor/test-videos/test_red_360p.mp4", "r");
+		RandomAccessFile file = new RandomAccessFile("/home/jd/Downloads/BigBuckBunny.mp4", "r");
 		
 		// Get the file channel
 		FileChannel channel = file.getChannel();
 
-		AtomRegistry.registerAtom("\u00Aa9too", (s, n, p) -> new AvcAtom(s, n, p));
+		AtomRegistry.registerAtom("\u00A9too", (s, n, p) -> new AvcAtom(s, n, p));
+		AtomRegistry.registerAtom("gsst", (s, n, p) -> new AvcAtom(s, n, p));
+		AtomRegistry.registerAtom("gstd", (s, n, p) -> new AvcAtom(s, n, p));
+		AtomRegistry.registerAtom("gssd", (s, n, p) -> new AvcAtom(s, n, p));
+		AtomRegistry.registerAtom("gspu", (s, n, p) -> new AvcAtom(s, n, p));
+		AtomRegistry.registerAtom("gspm", (s, n, p) -> new AvcAtom(s, n, p));
+		AtomRegistry.registerAtom("gshh", (s, n, p) -> new AvcAtom(s, n, p));
+		
 		
 		Mp4File mp4file = Mp4File.parse(channel);
 

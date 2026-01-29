@@ -3,6 +3,7 @@ package com.jd.majors.mp4_processor.Parsing;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -43,8 +44,6 @@ public class Mp4File
 		this.fileChannel = fileChannel;
 	}
 
-	// this assumes the offset is set correctly at the start of the atom
-	// throws error or causes logic issues if not, which is good imo. puts responsibility on function user
 	private byte[] getRawAtom(long offset) throws IOException
 	{
 		// can significantly speed reads
@@ -89,7 +88,9 @@ public class Mp4File
 			eightMultiple = eightMultiple - 1;
 		}
 		
-		String name = new String(Arrays.copyOfRange(rawAtom, 4, 8));
+		// use ISO_8859_1 to get 1:1 byte to char mapping
+		// utf-8 would mangle non-ascii chars 
+		String name = new String(Arrays.copyOfRange(rawAtom, 4, 8), StandardCharsets.ISO_8859_1);
 		byte[] payload = Arrays.copyOfRange(rawAtom, 8, rawAtom.length);
 		
 		Box atom = AtomRegistry.createAtom(size, name, payload);
@@ -120,6 +121,10 @@ public class Mp4File
 		{
 			Box atom = createAtom(offset);
 
+			// some atoms can be in a container or top-level
+			// flag to track if atom has been added to a container to prevent adding to top-level list
+			boolean isInContainer = false;
+			
 			// error handling
 			if (atom == null)
 			{
@@ -142,15 +147,7 @@ public class Mp4File
 			{
 				((Leaf) atom).parse();
 			}
-			if (atom instanceof TopLevelAtom)
-			{
-				topLevelAtoms.add(atom);
-			}
-			if (atom instanceof ContainerBox)
-			{
-				// add to container atom map with end offset
-				containerAtoms.put((ContainerBox) atom, offset + atom.size());
-			}
+			
 			if (atom instanceof NestedAtom)
 			{
 				List<ContainerBox> containerAtomsList = new java.util.ArrayList<ContainerBox>(containerAtoms.keySet());
@@ -172,11 +169,23 @@ public class Mp4File
 					{
 						// atom is within container
 						containerAtom.addAtom((NestedAtom) atom);
+						isInContainer = true;
 						break; // only add to the innermost container
 					}
 				}
 			}
-
+			
+			if (atom instanceof TopLevelAtom && isInContainer == false)
+			{
+				topLevelAtoms.add(atom);
+			}
+			
+			if (atom instanceof ContainerBox)
+			{
+				// add to container atom map with end offset
+				containerAtoms.put((ContainerBox) atom, offset + atom.size());
+			}
+			
 			if (atom instanceof Leaf)
 			{
 				offset = offset + atom.size();
