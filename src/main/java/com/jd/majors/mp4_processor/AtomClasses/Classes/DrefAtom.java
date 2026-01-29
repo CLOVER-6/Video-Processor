@@ -1,5 +1,6 @@
 package com.jd.majors.mp4_processor.AtomClasses.Classes;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -50,7 +51,7 @@ public class DrefAtom implements FullBox, ContainerBox, NestedAtom, Leaf
         this.version = version;
         this.flags = f;
         this.entryCount = 0;
-        this.dataReferences = null;
+        this.dataReferences = new ArrayList<Box>();
         this.payload = payload;
     }
 
@@ -62,7 +63,7 @@ public class DrefAtom implements FullBox, ContainerBox, NestedAtom, Leaf
         this.version = payload[0];
         this.flags = Arrays.copyOfRange(payload, 1, 4);
         this.entryCount = 0;
-        this.dataReferences = null;
+        this.dataReferences = new ArrayList<Box>();
         this.payload = Arrays.copyOfRange(payload, 4, payload.length);
     }
 

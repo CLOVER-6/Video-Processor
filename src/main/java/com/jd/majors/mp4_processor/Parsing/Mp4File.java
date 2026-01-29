@@ -15,6 +15,9 @@ import javax.swing.event.ListSelectionEvent;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.ContainerBox;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullBox;
+import com.jd.majors.mp4_processor.AtomClasses.Classes.AvcAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Classes.FtypAtom;
+import com.jd.majors.mp4_processor.AtomClasses.Classes.UrxAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.TopLevelAtom;
@@ -85,10 +88,10 @@ public class Mp4File
 			size = size | (rawAtom[i] & 0xFF) << 8 * eightMultiple;
 			eightMultiple = eightMultiple - 1;
 		}
-
+		
 		String name = new String(Arrays.copyOfRange(rawAtom, 4, 8));
 		byte[] payload = Arrays.copyOfRange(rawAtom, 8, rawAtom.length);
-
+		
 		Box atom = AtomRegistry.createAtom(size, name, payload);
 		return atom;
 	}
@@ -120,7 +123,7 @@ public class Mp4File
 			// error handling
 			if (atom == null)
 			{
-				break;
+				throw new Exception("Unknown atom found at offset " + offset);
 			}
 			if (atom.size() <= 0)
 			{

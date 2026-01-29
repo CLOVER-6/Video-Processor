@@ -1,5 +1,6 @@
 package com.jd.majors.mp4_processor;
 
+import com.jd.majors.mp4_processor.AtomClasses.Classes.AvcAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Classes.DrefAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Classes.ElstAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Classes.FtypAtom;
@@ -25,53 +26,49 @@ import java.awt.Container;
 import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.List;
 
 public class App 
 {
-    public static void main( String[] args ) throws Exception
-    {
-    	 // Open a file for read and write
-        RandomAccessFile file = new RandomAccessFile("/home/jd/eclipse-workspace/mp4-processor/test-videos/test_red_720p.mp4", "r");
 
-        // Get the file channel
-        FileChannel channel = file.getChannel();
-       
-        Mp4File mp4file = Mp4File.parse(channel);
-        
-        for (Box atom : mp4file.topLevelAtoms())
-		{
-			System.out.println(atom.toString());
-			
-			if (atom instanceof MoovAtom)
-			{
-				MoovAtom moov = (MoovAtom) atom;
-				
-				for (Box child : moov.childAtoms())
-				{
-					System.out.println("  " + child.toString());
-					if (child instanceof ContainerBox)
-					{
-						ContainerBox container = (ContainerBox) child;
-						
-						for (Box grandChild : container.childAtoms())
-						{
-							System.out.println("    " + grandChild.toString());
-							
-							if (grandChild instanceof ContainerBox)
-							{
-								ContainerBox grandContainer = (ContainerBox) grandChild;
-								
-								for (Box greatGrandChild : grandContainer.childAtoms())
-								{
-									System.out.println("      " + greatGrandChild.toString());
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-        
-        file.close();
+    public static void printMp4Structure(Mp4File mp4File) {
+        for (Box atom : mp4File.topLevelAtoms()) {
+            printAtom(atom, 0);
+        }
     }
+
+    private static void printAtom(Box atom, int depth) {
+        // indentation based on nesting depth
+        String indent = "  ".repeat(depth);
+
+        System.out.println(
+                indent + "- " + atom.toString()
+        );
+
+        // recurse into children if this is a container
+        if (atom instanceof ContainerBox container) {
+            List<? extends Box> children = container.childAtoms();
+            for (Box child : children) {
+                printAtom(child, depth + 1);
+            }
+        }
+    }
+
+	public static void main( String[] args ) throws Exception
+	{
+		// Open a file for read and write
+		RandomAccessFile file = new RandomAccessFile("/home/jd/eclipse-workspace/mp4-processor/test-videos/test_red_360p.mp4", "r");
+		
+		// Get the file channel
+		FileChannel channel = file.getChannel();
+
+		AtomRegistry.registerAtom("\u00Aa9too", (s, n, p) -> new AvcAtom(s, n, p));
+		
+		Mp4File mp4file = Mp4File.parse(channel);
+
+	    printMp4Structure(mp4file);
+
+	}
+
 }

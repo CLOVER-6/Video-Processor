@@ -41,7 +41,7 @@ public class AtomRegistry
 		}
 		else
 		{
-			return null;
+			return new AvcAtom(size, name, payload);
 		}
 	}
 	
@@ -71,6 +71,8 @@ public class AtomRegistry
         registerAtom("minf", (s, n, p) -> new MinfAtom(s, n, p));
         registerAtom("dinf", (s, n, p) -> new DinfAtom(s, n, p));
         registerAtom("dref", (s, n, p) -> new DrefAtom(s, n, p));
+        registerAtom("url\u0020", (s, n, p) -> new UrxAtom(s, n, p));
+        registerAtom("urn\u0020", (s, n, p) -> new UrxAtom(s, n, p));
         registerAtom("vmhd", (s, n, p) -> new VmhdAtom(s, n, p));
 
         // Sample tables
