@@ -74,7 +74,8 @@ public class FtypAtom implements Leaf, TopLevelAtom
     public String majorBrand() { return majorBrand; }
     public long minorVersion() { return minorVersion; }
     public String[] compatibleBrands() { return compatibleBrands; }
-
+    public byte[] payload() { return payload; }
+    
     @Override
     public String toString() 
     {

@@ -8,6 +8,6 @@ import java.util.List;
  */
 public non-sealed interface ContainerBox extends Box
 {
-	public void addAtom(NestedAtom atom);
+	public void addAtom(NestedAtom atom) throws Exception;
 	public List<Box> childAtoms();
 }

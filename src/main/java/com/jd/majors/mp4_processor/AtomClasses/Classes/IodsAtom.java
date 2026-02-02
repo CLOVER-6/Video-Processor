@@ -54,6 +54,7 @@ public class IodsAtom implements Leaf, FullBox, NestedAtom, TopLevelAtom
 	public String name() { return name; }
 	public short version() { return version; }
 	public byte[] flags() { return flags; }
+	public byte[] payload() { return payload; }
 
 	public void setParent(Box atom)
 	{

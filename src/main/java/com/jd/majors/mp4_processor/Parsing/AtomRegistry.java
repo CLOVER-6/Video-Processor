@@ -79,7 +79,7 @@ public class AtomRegistry
         // Sample tables
         registerAtom("stbl", (s, n, p) -> new StblAtom(s, n, p));
         registerAtom("stsd", (s, n, p) -> new StsdAtom(s, n, p));
-        registerAtom("avc1", (s, n, p) -> new AvcAtom(s, n, p));
+        registerAtom("avc1", (s, n, p) -> new Avc1Atom(s, n, p));
         registerAtom("stts", (s, n, p) -> new SttsAtom(s, n, p));
         registerAtom("stsc", (s, n, p) -> new StscAtom(s, n, p));
         registerAtom("stsz", (s, n, p) -> new StszAtom(s, n, p));

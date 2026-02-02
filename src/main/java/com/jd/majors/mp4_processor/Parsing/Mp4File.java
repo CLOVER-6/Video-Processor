@@ -4,21 +4,14 @@ import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.swing.event.ListSelectionEvent;
-
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.ContainerBox;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullBox;
-import com.jd.majors.mp4_processor.AtomClasses.Classes.AvcAtom;
-import com.jd.majors.mp4_processor.AtomClasses.Classes.FtypAtom;
-import com.jd.majors.mp4_processor.AtomClasses.Classes.UrxAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.TopLevelAtom;
@@ -92,7 +85,7 @@ public class Mp4File
 		// utf-8 would mangle non-ascii chars 
 		String name = new String(Arrays.copyOfRange(rawAtom, 4, 8), StandardCharsets.ISO_8859_1);
 		byte[] payload = Arrays.copyOfRange(rawAtom, 8, rawAtom.length);
-		
+
 		Box atom = AtomRegistry.createAtom(size, name, payload);
 		return atom;
 	}
@@ -143,11 +136,6 @@ public class Mp4File
 				throw new Exception("Invalid atom name encountered at offset " + offset);
 			}
 
-			if (atom instanceof Leaf)
-			{
-				((Leaf) atom).parse();
-			}
-			
 			if (atom instanceof NestedAtom)
 			{
 				List<ContainerBox> containerAtomsList = new java.util.ArrayList<ContainerBox>(containerAtoms.keySet());
@@ -177,6 +165,11 @@ public class Mp4File
 			
 			if (atom instanceof TopLevelAtom && isInContainer == false)
 			{
+				if (atom instanceof Leaf)
+				{
+					((Leaf) atom).parse();
+				}
+				
 				topLevelAtoms.add(atom);
 			}
 			
@@ -186,6 +179,7 @@ public class Mp4File
 				containerAtoms.put((ContainerBox) atom, offset + atom.size());
 			}
 			
+			// move offset
 			if (atom instanceof Leaf)
 			{
 				offset = offset + atom.size();

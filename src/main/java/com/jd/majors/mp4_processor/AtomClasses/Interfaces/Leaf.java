@@ -8,4 +8,5 @@ package com.jd.majors.mp4_processor.AtomClasses.Interfaces;
 public non-sealed interface Leaf extends Box
 {
 	Box parse() throws Exception;
+	byte[] payload();
 }

@@ -20,7 +20,7 @@ import com.jd.majors.mp4_processor.Parsing.AtomRegistry;
  * - This implementation enforces that sample descriptions are `AvcAtom` instances.
  * - The internal payload is cleared after parsing to prevent re-parsing.
  */
-public class StsdAtom implements FullBox, NestedAtom, ContainerBox , Leaf
+public class StsdAtom implements FullBox, NestedAtom, ContainerBox, Leaf
 {
 	private Box parentAtom;
     private final int size;
@@ -43,7 +43,7 @@ public class StsdAtom implements FullBox, NestedAtom, ContainerBox , Leaf
         // not allowing instantiation with other types
         for (Box sampleDesc : sampleDescs)
         {
-        	if (!(sampleDesc instanceof AvcAtom))
+        	if (!(sampleDesc instanceof Avc1Atom))
         	{
         		throw new IllegalArgumentException();
         	}
@@ -73,18 +73,6 @@ public class StsdAtom implements FullBox, NestedAtom, ContainerBox , Leaf
         this.entryCount = 0;
         this.sampleDescs = new ArrayList<Box>();
         this.payload = Arrays.copyOfRange(payload, 4, payload.length);
-    }
-
-    // check drefAtom for note on the privacy controls of this func
-    public void addAtom(NestedAtom atom)
-    {
-    	if (!(atom instanceof AvcAtom)) 
-    	{
-    		throw new IllegalArgumentException();
-    	}
-    	
-    	atom.setParent(this);
-    	sampleDescs.add(atom);
     }
     
     // TODO fill this out
@@ -156,6 +144,26 @@ public class StsdAtom implements FullBox, NestedAtom, ContainerBox , Leaf
     	this.parentAtom = atom;
     }
 
+    // check drefAtom for note on the privacy controls of this func
+    public void addAtom(NestedAtom atom) throws Exception
+    {
+    	if (!(atom instanceof Avc1Atom)) 
+    	{
+    		throw new IllegalArgumentException();
+    	}
+    	
+    	if (atom instanceof Leaf)
+    	{
+    		if (((Leaf) atom).payload() != null)
+    		{
+    			((Leaf) atom).parse();
+    		}
+    	}
+    	
+    	atom.setParent(this);
+    	sampleDescs.add(atom);
+    }
+    
 	@Override
 	public String toString() {
 		return "StsdAtom [size=" + size + ", name=" + name + ", version=" + version

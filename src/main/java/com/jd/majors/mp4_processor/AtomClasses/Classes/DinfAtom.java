@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.ContainerBox;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
@@ -31,12 +32,6 @@ public class DinfAtom implements NestedAtom, ContainerBox
         this.childAtoms = new ArrayList<Box>();
     }
     
-    public void addAtom(NestedAtom atom)
-    {
-    	atom.setParent(this);
-    	childAtoms.add(atom);
-    }
-
     public Box parentAtom() { return parentAtom; }
     public int size() { return size; }
     public String name() { return name; }
@@ -47,6 +42,20 @@ public class DinfAtom implements NestedAtom, ContainerBox
 		this.parentAtom = atom;
 	}
 
+    public void addAtom(NestedAtom atom) throws Exception
+    {
+    	if (atom instanceof Leaf)
+    	{
+    		if (((Leaf) atom).payload() != null)
+    		{
+    			((Leaf) atom).parse();
+    		}
+    	}
+    	
+    	atom.setParent(this);
+    	childAtoms.add(atom);
+    }
+    
 	@Override
 	public String toString() 
 	{

@@ -4,53 +4,63 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.ContainerBox;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
 public class StblAtom implements ContainerBox, NestedAtom
 {
 	private Box parentAtom;
-    private final int size;
-    private final String name;
-    private final List<Box> childAtoms;
+	private final int size;
+	private final String name;
+	private final List<Box> childAtoms;
 
-    public StblAtom(int size, String name, List<Box> childAtoms) 
-    {
-    	this.parentAtom = null;
-        this.size = size;
-        this.name = name;
-        this.childAtoms = childAtoms;
-    }
+	public StblAtom(int size, String name, List<Box> childAtoms) 
+	{
+		this.parentAtom = null;
+		this.size = size;
+		this.name = name;
+		this.childAtoms = childAtoms;
+	}
 
-    public StblAtom(int size, String name, byte[] payload) 
-    {
-    	this.parentAtom = null;
-        this.size = size;
-        this.name = name;
-        this.childAtoms = new ArrayList<Box>();
-    }
-    
-    public void addAtom(NestedAtom atom)
-    {
-    	atom.setParent(this);
-    	childAtoms.add(atom);
-    }
-    
-    public Box parentAtom() { return parentAtom; }
-    public int size() { return size; }
-    public String name() { return name; }
-    public List<Box> childAtoms() { return childAtoms; }
+	public StblAtom(int size, String name, byte[] payload) 
+	{
+		this.parentAtom = null;
+		this.size = size;
+		this.name = name;
+		this.childAtoms = new ArrayList<Box>();
+	}
 
-    public void setParent(Box atom)
-    {
-    	this.parentAtom = atom;
-    }
-    
-    @Override
-    public String toString() 
-    {
-        return "StblAtom [size=" + size + ", name=" + name + "]";
-    }
+	public Box parentAtom() { return parentAtom; }
+	public int size() { return size; }
+	public String name() { return name; }
+	public List<Box> childAtoms() { return childAtoms; }
+
+	public void setParent(Box atom)
+	{
+		this.parentAtom = atom;
+	}
+	
+	public void addAtom(NestedAtom atom) throws Exception
+	{
+		if (atom instanceof Leaf)
+		{
+			if (((Leaf) atom).payload() != null)
+			{
+				((Leaf) atom).parse();
+			}
+		}
+
+
+		atom.setParent(this);
+		childAtoms.add(atom);
+	}
+
+	@Override
+	public String toString() 
+	{
+		return "StblAtom [size=" + size + ", name=" + name + "]";
+	}
 
 	@Override
 	public int hashCode() {
@@ -69,5 +79,5 @@ public class StblAtom implements ContainerBox, NestedAtom
 		return Objects.equals(name, other.name) && size == other.size;
 	}
 
-    
+
 }

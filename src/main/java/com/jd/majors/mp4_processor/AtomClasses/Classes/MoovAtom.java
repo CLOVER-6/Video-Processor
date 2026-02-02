@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.ContainerBox;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.TopLevelAtom;
@@ -26,17 +27,25 @@ public class MoovAtom implements TopLevelAtom, ContainerBox
         this.name = name;
         this.childAtoms = new ArrayList<Box>();
     }
-    
-    public void addAtom(NestedAtom atom)
-    {
-    	atom.setParent(this);
-    	childAtoms.add(atom);
-    }
 
     public int size() { return size; }
     public String name() { return name; }
     public List<Box> childAtoms() { return childAtoms; }
 
+    public void addAtom(NestedAtom atom) throws Exception
+    {
+    	if (atom instanceof Leaf)
+		{
+			if (((Leaf) atom).payload() != null)
+			{
+				((Leaf) atom).parse();
+			}
+		}
+    	
+    	atom.setParent(this);
+    	childAtoms.add(atom);
+    }
+    
     @Override
     public String toString() {
         return "MoovAtom [size=" + size + ", name=" + name + "]";

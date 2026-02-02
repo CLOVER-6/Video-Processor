@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.ContainerBox;
+import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
@@ -40,8 +41,16 @@ public class MdiaAtom implements ContainerBox, NestedAtom
     	this.parentAtom = atom;
     }
     
-    public void addAtom(NestedAtom atom)
+    public void addAtom(NestedAtom atom) throws Exception
     {
+    	if (atom instanceof Leaf)
+		{
+			if (((Leaf) atom).payload() != null)
+			{
+				((Leaf) atom).parse();
+			}
+		}
+    	
     	atom.setParent(this);
     	childAtoms.add(atom);
     }

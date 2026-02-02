@@ -173,6 +173,7 @@ public class MvhdAtom implements FullBox, NestedAtom, Leaf
 	public int volume() { return volume; }
 	public short[][] matrix() { return matrix; }
 	public long nextTrackID() { return nextTrackID; }
+	public byte[] payload() { return payload; }
 	
 	public void setParent(Box atom)
 	{

@@ -89,6 +89,7 @@ public class HdlrAtom implements FullBox, NestedAtom, Leaf
 	public byte[] flags() { return flags; }
 	public String handlerType() { return handlerType; }
 	public String handlerName() { return handlerName; }
+	public byte[] payload() { return payload; }
 
 	public void setParent(Box atom)
 	{

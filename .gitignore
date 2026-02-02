@@ -21,3 +21,5 @@ release.properties
 # OS files
 .DS_Store
 Thumbs.db
+
+src/main/java/com/jd/majors/mp4_processor/AtomClasses/Classes/PlaceholderAtom.java

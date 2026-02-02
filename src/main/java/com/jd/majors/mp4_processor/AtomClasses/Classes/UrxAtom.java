@@ -70,6 +70,7 @@ public class UrxAtom implements NestedAtom, FullBox, Leaf
 	public short version() { return version; }
 	public byte[] flags() { return flags; }
 	public String urx() { return urx; }
+	public byte[] payload() { return payload; }
 
 	public void setParent(Box atom)
 	{

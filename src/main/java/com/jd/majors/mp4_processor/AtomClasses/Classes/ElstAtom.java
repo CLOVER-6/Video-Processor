@@ -124,7 +124,8 @@ public class ElstAtom implements FullBox, NestedAtom, Leaf
 	public byte[] flags() { return flags; }
 	public int entryCount() { return entryCount; }
 	public long[][] entries() { return entries; }
-
+	public byte[] payload() { return payload; }
+	
 	public void setParent(Box atom)
 	{
 		this.parentAtom = atom;

@@ -14,7 +14,7 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
  * - Creation/modification times and duration are version-dependent (32-bit vs 64-bit).
  * - Language is stored as three 5-bit characters per ISO spec and decoded during parsing.
  */
-public class MdhdAtom implements FullBox, NestedAtom , Leaf
+public class MdhdAtom implements FullBox, NestedAtom, Leaf
 {
 	private Box parentAtom;
 	private final int size;
@@ -143,6 +143,7 @@ public class MdhdAtom implements FullBox, NestedAtom , Leaf
 	public long timescale() { return timescale; }
 	public long duration() { return duration; }
 	public String language() { return language; }
+	public byte[] payload() { return payload; }
 
 	public void setParent(Box atom)
 	{

@@ -182,6 +182,7 @@ public class TkhdAtom implements FullBox, NestedAtom, Leaf
 	public byte[][] matrix() { return matrix; }
 	public long width() { return width; }
 	public long height() { return height; }
+	public byte[] payload() { return payload; }
 
 	public void setParent(Box atom)
 	{
