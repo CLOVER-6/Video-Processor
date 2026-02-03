@@ -75,7 +75,7 @@ public class AtomRegistry
         registerAtom("urn\u0020", (s, n, p) -> new UrxAtom(s, n, p));
         registerAtom("vmhd", (s, n, p) -> new VmhdAtom(s, n, p));
         registerAtom("smhd", (s, n, p) -> new SmhdAtom(s, n, p));
-
+        
         // Sample tables
         registerAtom("stbl", (s, n, p) -> new StblAtom(s, n, p));
         registerAtom("stsd", (s, n, p) -> new StsdAtom(s, n, p));

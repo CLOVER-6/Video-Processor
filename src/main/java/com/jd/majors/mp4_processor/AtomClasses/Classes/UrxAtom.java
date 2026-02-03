@@ -1,5 +1,6 @@
 package com.jd.majors.mp4_processor.AtomClasses.Classes;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -58,7 +59,7 @@ public class UrxAtom implements NestedAtom, FullBox, Leaf
 			throw new Exception("Empty Payload - Cannot parse");
 		}
 
-		urx = new String(Arrays.copyOfRange(payload, 0, payload.length));
+		urx = new String(Arrays.copyOfRange(payload, 0, payload.length), StandardCharsets.ISO_8859_1);
 		payload = null;
 
 		return this;

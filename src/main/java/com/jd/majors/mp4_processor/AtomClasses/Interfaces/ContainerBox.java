@@ -8,6 +8,7 @@ import java.util.List;
  */
 public non-sealed interface ContainerBox extends Box
 {
+	public void parseChildren(boolean recursiveParseFlag) throws Exception;
 	public void addAtom(NestedAtom atom) throws Exception;
 	public List<Box> childAtoms();
 }

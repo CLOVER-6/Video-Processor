@@ -54,7 +54,6 @@ public class VmhdAtom implements FullBox, NestedAtom, Leaf
         this.payload = Arrays.copyOfRange(payload, 4, payload.length);
     }
     
-    // TODO fill this out
     public VmhdAtom parse() throws Exception
     {
     	if (payload == null)

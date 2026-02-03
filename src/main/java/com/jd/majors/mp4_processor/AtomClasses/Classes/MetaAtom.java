@@ -13,63 +13,78 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 public class MetaAtom implements ContainerBox, NestedAtom, FullBox
 {
 	private Box parentAtom;
-    private final int size;
-    private final String name;
-    private final short version;
-    private final byte[] flags;
-    private final List<Box> childAtoms;
+	private final int size;
+	private final String name;
+	private final short version;
+	private final byte[] flags;
+	private final List<Box> childAtoms;
 
-    public MetaAtom(int size, String name, short version, byte[] flags, List<Box> childAtoms) 
-    {
-        this.parentAtom = null;
-    	this.size = size;
-        this.name = name;
-        this.version = version;
-        this.flags = flags;
-        this.childAtoms = childAtoms;
-    }
+	public MetaAtom(int size, String name, short version, byte[] flags, List<Box> childAtoms) 
+	{
+		this.parentAtom = null;
+		this.size = size;
+		this.name = name;
+		this.version = version;
+		this.flags = flags;
+		this.childAtoms = childAtoms;
+	}
 
-    public MetaAtom(int size, String name, byte[] payload) 
-    {
-    	this.parentAtom = null;
-        this.size = size;
-        this.name = name;
-        this.version = payload[0];
-        this.flags = Arrays.copyOfRange(payload, 1, 4);
-        this.childAtoms = new ArrayList<Box>();
-    }
+	public MetaAtom(int size, String name, byte[] payload) 
+	{
+		this.parentAtom = null;
+		this.size = size;
+		this.name = name;
+		this.version = payload[0];
+		this.flags = Arrays.copyOfRange(payload, 1, 4);
+		this.childAtoms = new ArrayList<Box>();
+	}
 
-    public Box parentAtom() { return parentAtom; }
-    public int size() { return size; }
-    public String name() { return name; }
-    public short version() { return version; }
-    public byte[] flags() { return flags; }
-    public List<Box> childAtoms() { return childAtoms; }
-
-    public void setParent(Box atom)
-    {
-    	this.parentAtom = atom;
-    }
-    
-    public void addAtom(NestedAtom atom) throws Exception
-    {
-    	if (atom instanceof Leaf)
+	// flag to signify if a parse of children container is wanted too
+	public void parseChildren(boolean recursiveParseFlag) throws Exception
+	{
+		// guard
+		if (this.childAtoms == null || this.childAtoms.isEmpty())
 		{
-			if (((Leaf) atom).payload() != null)
+			return;
+		}
+
+		for (Box childAtom : this.childAtoms)
+		{
+			if (childAtom instanceof Leaf)
 			{
-				((Leaf) atom).parse();
+				((Leaf) childAtom).parse();
+			}
+
+			if (childAtom instanceof ContainerBox && recursiveParseFlag)
+			{
+				((ContainerBox) childAtom).parseChildren(recursiveParseFlag);
 			}
 		}
-    	
-    	atom.setParent(this);
-    	childAtoms.add(atom);
-    }
-   
-    @Override
-    public String toString() 
-    {
-        return "MetaAtom [size=" + size + ", name=" + name + "]";
-    }
+	}
+
+	public Box parentAtom() { return parentAtom; }
+	public int size() { return size; }
+	public String name() { return name; }
+	public short version() { return version; }
+	public byte[] flags() { return flags; }
+	public List<Box> childAtoms() { return childAtoms; }
+
+	public void setParent(Box atom)
+	{
+		this.parentAtom = atom;
+	}
+
+	public void addAtom(NestedAtom atom) throws Exception
+	{
+		atom.setParent(this);
+		childAtoms.add(atom);
+	}
+
+	@Override
+	public String toString() 
+	{
+		return "MetaAtom [size=" + size + ", name=" + name + "]";
+	}
 
 	@Override
 	public int hashCode() {
@@ -88,5 +103,5 @@ public class MetaAtom implements ContainerBox, NestedAtom, FullBox
 		return Objects.equals(name, other.name) && size == other.size;
 	}
 
-   
+
 }

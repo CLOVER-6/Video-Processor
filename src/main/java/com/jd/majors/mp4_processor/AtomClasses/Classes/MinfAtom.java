@@ -31,6 +31,29 @@ public class MinfAtom implements ContainerBox, NestedAtom
 		this.childAtoms = new ArrayList<Box>();
 	}
 
+	// flag to signify if a parse of children container is wanted too
+	public void parseChildren(boolean recursiveParseFlag) throws Exception
+	{
+		// guard
+		if (this.childAtoms == null || this.childAtoms.isEmpty())
+		{
+			return;
+		}
+
+		for (Box childAtom : this.childAtoms)
+		{
+			if (childAtom instanceof Leaf)
+			{
+				((Leaf) childAtom).parse();
+			}
+
+			if (childAtom instanceof ContainerBox && recursiveParseFlag)
+			{
+				((ContainerBox) childAtom).parseChildren(recursiveParseFlag);
+			}
+		}
+	}
+
 	public Box parentAtom() { return parentAtom; }
 	public int size() { return size; }
 	public String name() { return name; }
@@ -40,17 +63,9 @@ public class MinfAtom implements ContainerBox, NestedAtom
 	{
 		this.parentAtom = atom;
 	}
-	
+
 	public void addAtom(NestedAtom atom) throws Exception
 	{
-		if (atom instanceof Leaf)
-		{
-			if (((Leaf) atom).payload() != null)
-			{
-				((Leaf) atom).parse();
-			}
-		}
-
 		atom.setParent(this);
 		childAtoms.add(atom);
 	}

@@ -50,7 +50,6 @@ public class StscAtom implements FullBox, NestedAtom, Leaf
 		this.payload = Arrays.copyOfRange(payload, 4, payload.length);
 	}
 
-	// TODO fill this out
 	public StscAtom parse() throws Exception
 	{
 		if (payload == null)

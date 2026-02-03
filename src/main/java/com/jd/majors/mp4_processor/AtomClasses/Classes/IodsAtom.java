@@ -6,9 +6,8 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullBox;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
-import com.jd.majors.mp4_processor.AtomClasses.Interfaces.TopLevelAtom;
 
-public class IodsAtom implements Leaf, FullBox, NestedAtom, TopLevelAtom
+public class IodsAtom implements Leaf, NestedAtom, FullBox
 {
 	private Box parentAtom;
 	private final int size;
@@ -17,7 +16,8 @@ public class IodsAtom implements Leaf, FullBox, NestedAtom, TopLevelAtom
 	private final byte[] flags;
 	private byte[] payload;
 
-	public IodsAtom(int size, String name, short version, byte[] flags, byte[] payload) 
+	public IodsAtom(int size, String name, short version, byte[] flags,
+			byte[] payload) 
 	{
 		this.parentAtom = null;
 		this.size = size;
@@ -27,6 +27,7 @@ public class IodsAtom implements Leaf, FullBox, NestedAtom, TopLevelAtom
 		this.payload = null;
 	}
 
+	
 	public IodsAtom(int s, String n, byte[] payload) 
 	{
 		this.parentAtom = null;
@@ -60,4 +61,5 @@ public class IodsAtom implements Leaf, FullBox, NestedAtom, TopLevelAtom
 	{
 		this.parentAtom = atom;
 	}
+
 }

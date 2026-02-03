@@ -23,147 +23,157 @@ import com.jd.majors.mp4_processor.Parsing.AtomRegistry;
 public class StsdAtom implements FullBox, NestedAtom, ContainerBox, Leaf
 {
 	private Box parentAtom;
-    private final int size;
-    private final String name;
-    private final short version;
-    private final byte[] flags;
-    private int entryCount;
-    private final List<Box> sampleDescs;
-    private byte[] payload;
+	private final int size;
+	private final String name;
+	private final short version;
+	private final byte[] flags;
+	private int entryCount;
+	private final List<Box> sampleDescs;
+	private byte[] payload;
 
-    public StsdAtom(Box parentAtom, int s, String n, short version, byte[] f, int entryCount, List<Box> sampleDescs, byte[] payload) 
-    {
-    	this.parentAtom = parentAtom;
-        this.size = s;
-        this.name = n;
-        this.version = version;
-        this.flags = f;
-        this.entryCount = entryCount;
-        this.sampleDescs = sampleDescs;
-        // not allowing instantiation with other types
-        for (Box sampleDesc : sampleDescs)
-        {
-        	if (!(sampleDesc instanceof Avc1Atom))
-        	{
-        		throw new IllegalArgumentException();
-        	}
-        }
-        this.payload = null;
-    }
+	public StsdAtom(Box parentAtom, int s, String n, short version, byte[] f, int entryCount, List<Box> sampleDescs, byte[] payload) 
+	{
+		this.parentAtom = parentAtom;
+		this.size = s;
+		this.name = n;
+		this.version = version;
+		this.flags = f;
+		this.entryCount = entryCount;
+		this.sampleDescs = sampleDescs;
+		// not allowing instantiation with other types
+		for (Box sampleDesc : sampleDescs)
+		{
+			if (!(sampleDesc instanceof Avc1Atom))
+			{
+				throw new IllegalArgumentException();
+			}
+		}
+		this.payload = null;
+	}
 
-    public StsdAtom(int s, String n, short version, byte[] flags, byte[] payload) 
-    {
-    	this.parentAtom = null;
-        this.size = s;
-        this.name = n;
-        this.version = version;
-        this.flags = flags;
-        this.entryCount = 0;
-        this.sampleDescs = new ArrayList<Box>();
-        this.payload = payload;
-    }
-    
-    public StsdAtom(int s, String n, byte[] payload) 
-    {
-    	this.parentAtom = null;
-        this.size = s;
-        this.name = n;
-        this.version = payload[0];
-        this.flags = Arrays.copyOfRange(payload, 1, 4);
-        this.entryCount = 0;
-        this.sampleDescs = new ArrayList<Box>();
-        this.payload = Arrays.copyOfRange(payload, 4, payload.length);
-    }
-    
-    // TODO fill this out
-    public StsdAtom parse() throws Exception
-    {
-    	if (payload == null)
-    	{
-    		throw new Exception("Empty Payload - Cannot parse");
-    	}
-    	
-    	int eightMultiple = 3;
-        for (int i = 0; i < 4; i++)
-        {
-        	entryCount = entryCount | (payload[i] & 0xFF) << 8 * eightMultiple;
-        	 eightMultiple = eightMultiple - 1;
-        } 
+	public StsdAtom(int s, String n, short version, byte[] flags, byte[] payload) 
+	{
+		this.parentAtom = null;
+		this.size = s;
+		this.name = n;
+		this.version = version;
+		this.flags = flags;
+		this.entryCount = 0;
+		this.sampleDescs = new ArrayList<Box>();
+		this.payload = payload;
+	}
 
-        // push pointer away from entry count
-    	int atomOffset = 4;
-        
-        int sampleDecSize = 0;
-        String sampleDecName = "";
-        byte[] sampleDecPayload = null;
-        Box sampleDec = null;
-       
-        for (int i = 0; i < entryCount; i++)
-        {
-        	eightMultiple = 3;
-        	for (int j = atomOffset; j < atomOffset + 4; j++) 
-            {
-        		sampleDecSize = sampleDecSize | (payload[j] & 0xFF) << 8 * eightMultiple;
-            	eightMultiple = eightMultiple - 1;
-        	}
-        	
-        	sampleDecName = new String(Arrays.copyOfRange(payload, atomOffset + 4, atomOffset + 8));
-        	sampleDecPayload = Arrays.copyOfRange(payload, atomOffset + 8, sampleDecSize + atomOffset);
-        	sampleDec = AtomRegistry.createAtom(sampleDecSize, sampleDecName, sampleDecPayload);
-        	
-//        	if (sampleDec instanceof FullAtom)
-//        	{
-//        		((FullAtom) sampleDec).parse();
-//        	}
-        	
-        	if (sampleDec instanceof NestedAtom)
-        	{
-        		this.addAtom((NestedAtom) sampleDec);
-        	}
-        	
-        	atomOffset = atomOffset + sampleDecSize;
-        }
-        
-    	// ensure payload is nulled so subsequent parse calls can't re-parse unexpectedly
-    	payload = null;
-    	
-    	return this;
-    }
-    
-    public Box parentAtom() { return parentAtom; }
-    public int size() { return size; }
-    public String name() { return name; }
-    public short version() { return version; }
-    public byte[] flags() { return flags; }
-    public int entryCount() { return entryCount; }
-    public List<Box> childAtoms() { return sampleDescs; }
-    public byte[] payload() { return payload; }
-    
-    public void setParent(Box atom)
-    {
-    	this.parentAtom = atom;
-    }
+	public StsdAtom(int s, String n, byte[] payload) 
+	{
+		this.parentAtom = null;
+		this.size = s;
+		this.name = n;
+		this.version = payload[0];
+		this.flags = Arrays.copyOfRange(payload, 1, 4);
+		this.entryCount = 0;
+		this.sampleDescs = new ArrayList<Box>();
+		this.payload = Arrays.copyOfRange(payload, 4, payload.length);
+	}
 
-    // check drefAtom for note on the privacy controls of this func
-    public void addAtom(NestedAtom atom) throws Exception
-    {
-    	if (!(atom instanceof Avc1Atom)) 
-    	{
-    		throw new IllegalArgumentException();
-    	}
-    	
-    	if (atom instanceof Leaf)
-    	{
-    		if (((Leaf) atom).payload() != null)
-    		{
-    			((Leaf) atom).parse();
-    		}
-    	}
-    	
-    	atom.setParent(this);
-    	sampleDescs.add(atom);
-    }
-    
+	// TODO fill this out
+	public StsdAtom parse() throws Exception
+	{
+		if (payload == null)
+		{
+			throw new Exception("Empty Payload - Cannot parse");
+		}
+
+		int eightMultiple = 3;
+		for (int i = 0; i < 4; i++)
+		{
+			entryCount = entryCount | (payload[i] & 0xFF) << 8 * eightMultiple;
+			eightMultiple = eightMultiple - 1;
+		} 
+
+		// push pointer away from entry count
+		int atomOffset = 4;
+
+		int sampleDecSize = 0;
+		String sampleDecName = "";
+		byte[] sampleDecPayload = null;
+		Box sampleDec = null;
+
+		for (int i = 0; i < entryCount; i++)
+		{
+			eightMultiple = 3;
+			for (int j = atomOffset; j < atomOffset + 4; j++) 
+			{
+				sampleDecSize = sampleDecSize | (payload[j] & 0xFF) << 8 * eightMultiple;
+				eightMultiple = eightMultiple - 1;
+			}
+
+			sampleDecName = new String(Arrays.copyOfRange(payload, atomOffset + 4, atomOffset + 8));
+			sampleDecPayload = Arrays.copyOfRange(payload, atomOffset + 8, sampleDecSize + atomOffset);
+			sampleDec = AtomRegistry.createAtom(sampleDecSize, sampleDecName, sampleDecPayload);
+
+			if (sampleDec instanceof NestedAtom)
+			{
+				this.addAtom((NestedAtom) sampleDec);
+			}
+
+			atomOffset = atomOffset + sampleDecSize;
+		}
+
+		// ensure payload is nulled so subsequent parse calls can't re-parse unexpectedly
+		payload = null;
+
+		return this;
+	}
+
+	// flag to signify if a parse of children container is wanted too
+	public void parseChildren(boolean recursiveParseFlag) throws Exception
+	{
+		// guard
+		if (this.sampleDescs == null || this.sampleDescs.isEmpty())
+		{
+			return;
+		}
+
+		for (Box childAtom : this.sampleDescs)
+		{
+			if (childAtom instanceof Leaf)
+			{
+				((Leaf) childAtom).parse();
+			}
+
+			if (childAtom instanceof ContainerBox && recursiveParseFlag)
+			{
+				((ContainerBox) childAtom).parseChildren(recursiveParseFlag);
+			}
+		}
+	}
+
+	public Box parentAtom() { return parentAtom; }
+	public int size() { return size; }
+	public String name() { return name; }
+	public short version() { return version; }
+	public byte[] flags() { return flags; }
+	public int entryCount() { return entryCount; }
+	public List<Box> childAtoms() { return sampleDescs; }
+	public byte[] payload() { return payload; }
+
+	public void setParent(Box atom)
+	{
+		this.parentAtom = atom;
+	}
+
+	// check drefAtom for note on the privacy controls of this func
+	public void addAtom(NestedAtom atom) throws Exception
+	{
+		if (!(atom instanceof Avc1Atom)) 
+		{
+			throw new IllegalArgumentException();
+		}
+
+		atom.setParent(this);
+		sampleDescs.add(atom);
+	}
+
 	@Override
 	public String toString() {
 		return "StsdAtom [size=" + size + ", name=" + name + ", version=" + version
@@ -193,5 +203,5 @@ public class StsdAtom implements FullBox, NestedAtom, ContainerBox, Leaf
 				&& Objects.equals(sampleDescs, other.sampleDescs) && size == other.size && version == other.version;
 	}
 
-	
+
 }

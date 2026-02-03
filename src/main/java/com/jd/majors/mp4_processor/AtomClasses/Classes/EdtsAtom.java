@@ -12,55 +12,70 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 public class EdtsAtom implements NestedAtom, ContainerBox 
 {
 	private Box parentAtom;
-    private final int size;
-    private final String name;
-    private final List<Box> childAtoms;
+	private final int size;
+	private final String name;
+	private final List<Box> childAtoms;
 
-    public EdtsAtom(int size, String name, List<Box> childAtoms) 
-    {
-    	this.parentAtom = null;
-        this.size = size;
-        this.name = name;
-        this.childAtoms = childAtoms;
-    }
+	public EdtsAtom(int size, String name, List<Box> childAtoms) 
+	{
+		this.parentAtom = null;
+		this.size = size;
+		this.name = name;
+		this.childAtoms = childAtoms;
+	}
 
-    public EdtsAtom(int size, String name, byte[] payload) 
-    {
-    	this.parentAtom = null;
-        this.size = size;
-        this.name = name;
-        this.childAtoms = new ArrayList<Box>();
-    }
+	public EdtsAtom(int size, String name, byte[] payload) 
+	{
+		this.parentAtom = null;
+		this.size = size;
+		this.name = name;
+		this.childAtoms = new ArrayList<Box>();
+	}
 
-    public Box parentAtom() { return parentAtom; }
-    public int size() { return size; }
-    public String name() { return name; }
-    public List<Box> childAtoms() { return childAtoms; }
+	// flag to signify if a parse of children container is wanted too
+	public void parseChildren(boolean recursiveParseFlag) throws Exception
+	{
+		// guard
+		if (this.childAtoms == null || this.childAtoms.isEmpty())
+		{
+			return;
+		}
 
-    public void setParent(Box atom)
+		for (Box childAtom : this.childAtoms)
+		{
+			if (childAtom instanceof Leaf)
+			{
+				((Leaf) childAtom).parse();
+			}
+
+			if (childAtom instanceof ContainerBox && recursiveParseFlag)
+			{
+				((ContainerBox) childAtom).parseChildren(recursiveParseFlag);
+			}
+		}
+	}
+
+	public Box parentAtom() { return parentAtom; }
+	public int size() { return size; }
+	public String name() { return name; }
+	public List<Box> childAtoms() { return childAtoms; }
+
+	public void setParent(Box atom)
 	{
 		this.parentAtom = atom;
 	}
 
-    public void addAtom(NestedAtom atom) throws Exception
-    {
-    	if (!(atom instanceof ElstAtom)) 
-    	{
-    		throw new IllegalArgumentException();
-    	}
-    	
-    	if (atom instanceof Leaf)
-    	{
-    		if (((Leaf) atom).payload() != null)
-    		{
-    			((Leaf) atom).parse();
-    		}
-    	}
-    	
-    	atom.setParent(this);
-    	childAtoms.add(atom);
-    }
-    
+	public void addAtom(NestedAtom atom) throws Exception
+	{
+		if (!(atom instanceof ElstAtom)) 
+		{
+			throw new IllegalArgumentException();
+		}
+
+		atom.setParent(this);
+		childAtoms.add(atom);
+	}
+
 	@Override
 	public String toString() 
 	{

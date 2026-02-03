@@ -11,55 +11,70 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 public class MdiaAtom implements ContainerBox, NestedAtom
 {
 	public Box parentAtom;
-    private final int size;
-    private final String name;
-    public List<Box> childAtoms;
+	private final int size;
+	private final String name;
+	public List<Box> childAtoms;
 
-    public MdiaAtom(Box parentAtom, int size, String name, List<Box> childAtoms) 
-    {
-    	this.parentAtom = parentAtom;
-        this.size = size;
-        this.name = name;
-        this.childAtoms = childAtoms;
-    }
+	public MdiaAtom(Box parentAtom, int size, String name, List<Box> childAtoms) 
+	{
+		this.parentAtom = parentAtom;
+		this.size = size;
+		this.name = name;
+		this.childAtoms = childAtoms;
+	}
 
-    public MdiaAtom(int size, String name, byte[] payload) 
-    {
-    	this.parentAtom = null;
-        this.size = size;
-        this.name = name;
-        this.childAtoms = new ArrayList<Box>();
-    }
+	public MdiaAtom(int size, String name, byte[] payload) 
+	{
+		this.parentAtom = null;
+		this.size = size;
+		this.name = name;
+		this.childAtoms = new ArrayList<Box>();
+	}
 
-    public Box parentAtom() { return parentAtom; }
-    public int size() { return size; }
-    public String name() { return name; }
-    public List<Box> childAtoms() { return childAtoms; }
-    
-    public void setParent(Box atom)
-    {
-    	this.parentAtom = atom;
-    }
-    
-    public void addAtom(NestedAtom atom) throws Exception
-    {
-    	if (atom instanceof Leaf)
+	// flag to signify if a parse of children container is wanted too
+	public void parseChildren(boolean recursiveParseFlag) throws Exception
+	{
+		// guard
+		if (this.childAtoms == null || this.childAtoms.isEmpty())
 		{
-			if (((Leaf) atom).payload() != null)
+			return;
+		}
+
+		for (Box childAtom : this.childAtoms)
+		{
+			if (childAtom instanceof Leaf)
 			{
-				((Leaf) atom).parse();
+				((Leaf) childAtom).parse();
+			}
+
+			if (childAtom instanceof ContainerBox && recursiveParseFlag)
+			{
+				((ContainerBox) childAtom).parseChildren(recursiveParseFlag);
 			}
 		}
-    	
-    	atom.setParent(this);
-    	childAtoms.add(atom);
-    }
-    
-    @Override
-    public String toString() 
-    {
-        return "MdiaAtom [size=" + size + ", name=" + name + "]";
-    }
+	}
+
+	public Box parentAtom() { return parentAtom; }
+	public int size() { return size; }
+	public String name() { return name; }
+	public List<Box> childAtoms() { return childAtoms; }
+
+	public void setParent(Box atom)
+	{
+		this.parentAtom = atom;
+	}
+
+	public void addAtom(NestedAtom atom) throws Exception
+	{
+		atom.setParent(this);
+		childAtoms.add(atom);
+	}
+
+	@Override
+	public String toString() 
+	{
+		return "MdiaAtom [size=" + size + ", name=" + name + "]";
+	}
 
 	@Override
 	public int hashCode() {
@@ -78,5 +93,5 @@ public class MdiaAtom implements ContainerBox, NestedAtom
 		return Objects.equals(name, other.name) && size == other.size;
 	}
 
-    
+
 }

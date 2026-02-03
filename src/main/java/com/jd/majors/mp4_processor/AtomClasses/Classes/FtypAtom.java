@@ -49,7 +49,7 @@ public class FtypAtom implements Leaf, TopLevelAtom
         int eightMultiple = 3;
         for (int i = 4; i < 8; i++)
         {
-            minorVersion = minorVersion | ((long)(payload[i] & 0xFF) << (8 * eightMultiple));
+            minorVersion = minorVersion | ((long) (payload[i] & 0xFF) << (8 * eightMultiple));
             eightMultiple = eightMultiple - 1;
         }
 
@@ -75,7 +75,7 @@ public class FtypAtom implements Leaf, TopLevelAtom
     public long minorVersion() { return minorVersion; }
     public String[] compatibleBrands() { return compatibleBrands; }
     public byte[] payload() { return payload; }
-    
+
     @Override
     public String toString() 
     {

@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
@@ -108,7 +109,8 @@ public class Mp4File
 		topLevelAtoms = new java.util.ArrayList<Box>();
 		
 		// a hashmap to hold container atoms and their end offsets in order to manage nesting
-		HashMap<ContainerBox, Integer> containerAtoms = new HashMap<ContainerBox, Integer>();
+		// linked hashmap keeps order when calling keyset 
+		LinkedHashMap<ContainerBox, Integer> containerAtoms = new LinkedHashMap<ContainerBox, Integer>();
 
 		while (offset < fileChannel.size())
 		{
@@ -165,11 +167,6 @@ public class Mp4File
 			
 			if (atom instanceof TopLevelAtom && isInContainer == false)
 			{
-				if (atom instanceof Leaf)
-				{
-					((Leaf) atom).parse();
-				}
-				
 				topLevelAtoms.add(atom);
 			}
 			
@@ -193,6 +190,20 @@ public class Mp4File
 			else
 			{
 				offset = offset + 8;
+			}
+		}
+		
+		boolean recursiveParseFlag = true;
+		for (Box topLevelAtom : topLevelAtoms)
+		{
+			if (topLevelAtom instanceof Leaf)
+			{
+				((Leaf) topLevelAtom).parse();
+			}
+			
+			if (topLevelAtom instanceof ContainerBox)
+			{
+				((ContainerBox) topLevelAtom).parseChildren(recursiveParseFlag);;
 			}
 		}
 	}
