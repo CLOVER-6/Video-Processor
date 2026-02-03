@@ -7,6 +7,12 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Placeholder Atom
+ * 
+ * Note: this is useful for quickly parsing a file; however, it goes against the principles of this project.
+ * Each atom should be contained in a self-parsing class that handles the values intelligently. Use with caution.
+ */
 public class PlaceholderAtom implements NestedAtom, Leaf
 {
 	private Box parentAtom;
@@ -68,5 +74,6 @@ public class PlaceholderAtom implements NestedAtom, Leaf
 		PlaceholderAtom other = (PlaceholderAtom) obj;
 		return Objects.equals(name, other.name) && Arrays.equals(payload, other.payload) && size == other.size;
 	}
+
 
 }
