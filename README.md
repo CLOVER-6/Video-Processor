@@ -1,7 +1,5 @@
 # Video-Processor
 Video processor in Java
 
-## TODO
-- collect audio atom information
-- create video tests
-- get coding
+## Code Structure
+![alt text](https://github.com/CLOVER-6/Video-Processor/blob/main/mp4-processor-flowchart.png?raw=true)
