@@ -1,4 +1,3 @@
-- specialise each atom class to its specific data and allow it to parse itself
 - create ability to split samples into decode units (frames). AVC NAL units
 - display basic individual frames using external AVC decoder
 - frame chaining at correct fps
