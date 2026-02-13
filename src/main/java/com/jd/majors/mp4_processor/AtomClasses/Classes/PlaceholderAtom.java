@@ -8,10 +8,17 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
 /**
- * Placeholder Atom
- * 
- * Note: this is useful for quickly parsing a file; however, it goes against the principles of this project.
- * Each atom should be contained in a self-parsing class that handles the values intelligently. Use with caution.
+ * Lightweight placeholder atom used for unknown or unimplemented box types.
+ *
+ * <p>This class provides a minimal representation for atoms that are not yet
+ * modelled in detail by the parser. It stores raw {@code payload} bytes which
+ * are discarded when {@code parse()} is invoked; it therefore acts as a
+ * safe stub that preserves file layout without modelling semantics.</p>
+ *
+ * <p>Implementation notes: this class implements {@code NestedAtom} and
+ * {@code Leaf}; callers should set the parent when adding to a container.
+ * It intentionally keeps behavior minimal so it can be used as a temporary
+ * stand-in for unsupported box types.</p>
  */
 public class PlaceholderAtom implements NestedAtom, Leaf
 {

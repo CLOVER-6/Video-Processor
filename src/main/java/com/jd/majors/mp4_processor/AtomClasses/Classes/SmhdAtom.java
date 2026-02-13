@@ -7,6 +7,22 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Representation of the 'smhd' (sound media header) full box which provides
+ * simple audio renderer hints for a track.
+ *
+ * <p>The box contains fields that may be used for simple audio mixing or
+ * renderer configuration. For most audio decoding tasks the fields are hints
+ * rather than strict decoder parameters.</p>
+ *
+ * <p>This class stores a raw {@code payload} until {@code parse()} is called;
+ * parsing currently clears the payload and implementations may later expose
+ * parsed fields if needed.</p>
+ *
+ * <p>Implementation notes: {@code SmhdAtom} implements {@code FullBox} and
+ * {@code NestedAtom} and preserves {@code version} and {@code flags} from the
+ * header.</p>
+ */
 public class SmhdAtom implements FullBox, NestedAtom, Leaf
 {
 	private Box parentAtom;

@@ -13,12 +13,23 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 import com.jd.majors.mp4_processor.Parsing.AtomRegistry;
 
 /**
- * Data reference atom (dref).
+ * Representation of the 'dref' (data reference) full box and its contained
+ * reference entries.
  *
- * Notes:
- * - Contains references to other data atoms (url/urn boxes).
- * - Parses children using `AtomRegistry.createAtom` and integrates them into the tree.
- * - Payload is cleared after parsing to prevent re-parsing.
+ * <p>The {@code dref} box holds a table of data reference entries (typically
+ * {@code url } or {@code urn} child atoms) that indicate the storage location
+ * of media data for a track. Each entry is itself an atom; therefore this
+ * class behaves as both a container and (in some constructors) as a leaf
+ * until the payload is parsed into child atoms.</p>
+ *
+ * <p>{@code parseChildren(boolean)} will iterate child atoms and optionally
+ * recurse into nested containers. The raw {@code payload} is cleared after
+ * parsing to prevent re-parsing and to reduce memory footprint.</p>
+ *
+ * <p>Implementation notes: this class implements {@code FullBox},
+ * {@code ContainerBox}, {@code NestedAtom} and {@code Leaf} to support both
+ * pre-parsed and on-demand parsing workflows; callers should supply or set
+ * the parent when attaching instances to a container.</p>
  */
 public class DrefAtom implements FullBox, ContainerBox, NestedAtom, Leaf
 {

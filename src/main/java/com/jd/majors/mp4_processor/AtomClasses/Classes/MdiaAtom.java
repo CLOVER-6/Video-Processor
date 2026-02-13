@@ -3,21 +3,39 @@ package com.jd.majors.mp4_processor.AtomClasses.Classes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.ContainerBox;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Representation of the 'mdia' (media) container which groups media-related
+ * boxes for a track such as {@code mdhd}, {@code hdlr} and {@code minf}.
+ *
+ * <p>The media container provides track-specific metadata and references used
+ * by decoders and demuxers (timescale, handler information and the media
+ * information container).</p>
+ *
+ * <p>As a container the class exposes {@code parseChildren(boolean)} to
+ * recurse into contained atoms and to call {@code parse()} on leaf children
+ * when required. Implementations should clear raw payloads after parsing to
+ * reduce memory footprint.</p>
+ *
+ * <p>Implementation notes: this class implements {@code ContainerBox} and
+ * {@code NestedAtom} and therefore maintains a parent pointer; the
+ * {@code size} field includes the header bytes and is authoritative.</p>
+ */
 public class MdiaAtom implements ContainerBox, NestedAtom
 {
-	public Box parentAtom;
+	private Box parentAtom;
 	private final int size;
 	private final String name;
-	public List<Box> childAtoms;
+	private final List<Box> childAtoms;
 
-	public MdiaAtom(Box parentAtom, int size, String name, List<Box> childAtoms) 
+	public MdiaAtom(int size, String name, List<Box> childAtoms) 
 	{
-		this.parentAtom = parentAtom;
+		this.parentAtom = null;
 		this.size = size;
 		this.name = name;
 		this.childAtoms = childAtoms;

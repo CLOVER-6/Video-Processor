@@ -6,7 +6,6 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -18,16 +17,47 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.TopLevelAtom;
 
 /**
- * Mp4File is a lightweight reader for extracting raw atom byte ranges from
- * an open FileChannel and for constructing atom instances via the
- * AtomRegistry. It exposes a convenience `createAtom` that reads a single
- * atom at the provided file offset and returns an un-parsed atom object.
+ * Represents and parses an MP4 file, exposing its top-level atoms and
+ * providing access to nested atom hierarchies.
  *
- * Implementation notes:
- * - getRawAtom uses memory-mapping (MappedByteBuffer) for performance on
- *   large files. Consumers must ensure offsets passed in are correct; the
- *   method assumes the offset points to the start of an MP4 atom.
+ * <p>{@code Mp4File} is responsible for reading an MP4/ISO Base Media File
+ * Format stream via a {@link java.nio.channels.FileChannel} and constructing
+ * a tree of {@link Box} instances, including both container and leaf atoms.
+ * It handles atom size validation, parent–child nesting, and automatic parsing
+ * of payloads and child containers.</p>
+ *
+ * <p>Parsing is performed in a single pass using memory-mapped I/O to efficiently
+ * access file contents. The class supports the following behaviors:</p>
+ * <ul>
+ *   <li>Top-level atom detection and ordering, exposed via
+ *       {@link #topLevelAtoms()}.</li>
+ *   <li>Automatic nesting of {@link NestedAtom} instances into appropriate
+ *       {@link ContainerBox} parents.</li>
+ *   <li>Delegation to {@link AtomRegistry} for instantiating concrete atom
+ *       types based on four-character atom identifiers.</li>
+ *   <li>Parsing of {@link Leaf} atoms and recursive parsing of
+ *       {@link ContainerBox} children when requested.</li>
+ *   <li>Comprehensive validation of atom size, name, and boundaries to prevent
+ *       invalid memory access.</li>
+ * </ul>
+ *
+ * <p>Construction is private; instances must be obtained via the static
+ * {@link #parse(java.nio.channels.FileChannel)} factory method. This ensures
+ * that all parsing logic is applied and top-level atoms are populated before
+ * the object is exposed.</p>
+ *
+ * <p>Implementation notes:</p>
+ * <ul>
+ *   <li>Atom sizes and multi-byte values are interpreted in big-endian order.</li>
+ *   <li>Memory-mapped buffers are used to efficiently read large files.</li>
+ *   <li>Offset tracking ensures proper nesting and prevents duplicate
+ *       insertion into multiple containers.</li>
+ *   <li>After parsing, {@link Leaf} payloads are processed via their
+ *       {@link com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf#parse()} method,
+ *       and {@link ContainerBox} children are recursively parsed.</li>
+ * </ul>
  */
+
 public class Mp4File
 {
 	private final FileChannel fileChannel;

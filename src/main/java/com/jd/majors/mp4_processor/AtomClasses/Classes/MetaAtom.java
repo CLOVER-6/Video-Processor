@@ -10,6 +10,23 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Representation of the 'meta' metadata container which groups file- or track-
+ * level metadata atoms and item lists ({@code ilst}).
+ *
+ * <p>The {@code meta} box is used to carry descriptive metadata (title, artist,
+ * artwork, etc.) and commonly contains an {@code ilst} child that in turn
+ * contains individual metadata entries. This class preserves {@code version}
+ * and {@code flags} per the full box format.</p>
+ *
+ * <p>As a container it exposes {@code parseChildren(boolean)} to recurse into
+ * child atoms and to call {@code parse()} on leaf children. Implementations
+ * should clear raw payload buffers after materializing children.</p>
+ *
+ * <p>Implementation notes: this class implements {@code FullBox},
+ * {@code ContainerBox} and {@code NestedAtom} and maintains parent linkage.
+ * The {@code size} field is authoritative for on-disk layout.</p>
+ */
 public class MetaAtom implements ContainerBox, NestedAtom, FullBox
 {
 	private Box parentAtom;

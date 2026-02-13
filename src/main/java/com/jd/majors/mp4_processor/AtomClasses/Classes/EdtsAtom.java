@@ -9,6 +9,22 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Representation of the 'edts' (edit list) container atom.
+ *
+ * <p>The edit list container groups edit-related child atoms such as {@code
+ * elst} which define how a track maps segments of media to the presentation
+ * timeline (edits, empty edit placeholders, and trimming information).</p>
+ *
+ * <p>As a container this class stores child atoms and exposes
+ * {@code parseChildren(boolean)} to optionally recurse into nested containers
+ * and to call {@code parse()} on leaf children. After parsing, implementations
+ * typically clear raw payload buffers to reduce memory usage.</p>
+ *
+ * <p>Implementation details: this class implements {@code NestedAtom} and
+ * {@code ContainerBox} and therefore maintains a parent reference; the
+ * {@code size} field is treated as authoritative for on-disk byte layout.</p>
+ */
 public class EdtsAtom implements NestedAtom, ContainerBox 
 {
 	private Box parentAtom;

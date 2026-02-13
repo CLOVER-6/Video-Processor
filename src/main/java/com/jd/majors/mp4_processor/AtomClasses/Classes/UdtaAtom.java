@@ -9,6 +9,23 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Representation of the 'udta' (user data) container atom which holds
+ * application- or user-specific metadata (free-form child atoms).
+ *
+ * <p>The {@code udta} container is a flexible location for storing tags,
+ * proprietary metadata or other auxiliary data that does not affect decoding
+ * of media samples. Parsers should treat child atoms inside {@code udta} as
+ * optional and application-specific.</p>
+ *
+ * <p>As a container this class implements {@code parseChildren(boolean)} to
+ * optionally recurse into children and to call {@code parse()} on leaf
+ * children. Parent references are preserved when child atoms are added.</p>
+ *
+ * <p>Implementation notes: this class implements {@code ContainerBox} and
+ * {@code NestedAtom} and treats the {@code size} field as authoritative for
+ * on-disk layout.</p>
+ */
 public class UdtaAtom implements ContainerBox, NestedAtom
 {
 	private Box parentAtom;

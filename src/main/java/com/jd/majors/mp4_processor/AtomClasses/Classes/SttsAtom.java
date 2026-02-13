@@ -7,6 +7,23 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Representation of the 'stts' (decoding time to sample) full box which maps
+ * sample counts to decoding time deltas (sample durations).
+ *
+ * <p>The {@code stts} table provides the timing information needed to convert
+ * sample counts into timestamp deltas. It stores run-length encoded entries
+ * where each entry contains a sample count and the delta (duration) for those
+ * samples.</p>
+ *
+ * <p>This class defers building the {@code sampleEntries} table until
+ * {@code parse()} is called; after parsing the raw {@code payload} is cleared
+ * to reduce memory usage.</p>
+ *
+ * <p>Implementation notes: this box implements {@code FullBox} and
+ * {@code NestedAtom}; callers should set parent linkage when attaching the
+ * atom. Multi-byte integers are decoded with unsigned-aware arithmetic.</p>
+ */
 public class SttsAtom implements FullBox, NestedAtom, Leaf
 {
 	private Box parentAtom;

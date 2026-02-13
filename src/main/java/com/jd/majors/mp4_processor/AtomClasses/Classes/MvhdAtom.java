@@ -8,11 +8,21 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
 /**
- * Movie header atom (mvhd).
+ * Representation of the 'mvhd' (movie header) full box which holds global
+ * presentation-wide metadata such as timescale, duration and next track id.
  *
- * Notes:
- * - Field sizes for creation/modification time and duration are version-dependent (version 0 = 32-bit, version 1 = 64-bit).
- * - The class stores the parsed fields and clears the internal payload after parsing to avoid re-parsing.
+ * <p>The movie header provides file-level timing and playback parameters used
+ * by players and by track-level coordination (timescale, duration, rate, and
+ * volume). It contains a reference matrix and other fields necessary for
+ * presentation composition.</p>
+ *
+ * <p>This class holds the descriptor fields and consumes a raw {@code payload}
+ * when {@code parse()} is invoked to materialize those fields; raw buffers
+ * are cleared after parsing to reduce memory usage.</p>
+ *
+ * <p>Implementation notes: this is a {@code FullBox} and a {@code NestedAtom};
+ * the implementation treats the {@code size} field as authoritative and
+ * preserves {@code version} and {@code flags} read from the header.</p>
  */
 public class MvhdAtom implements FullBox, NestedAtom, Leaf
 {
@@ -30,7 +40,7 @@ public class MvhdAtom implements FullBox, NestedAtom, Leaf
     private short[][] matrix;
     private long nextTrackID;
     private byte[] payload;
-    
+
     public MvhdAtom(int size, String name, short version, byte[] flags, long creationTime, long modificationTime,
 				long timescale, long duration, long rate, int volume, short[][] matrix, long nextTrackID) 
     {
@@ -85,14 +95,14 @@ public class MvhdAtom implements FullBox, NestedAtom, Leaf
         this.nextTrackID =  0;
         this.payload = Arrays.copyOfRange(payload, 4, payload.length);
     }
-    
+
     public MvhdAtom parse() throws Exception
     {
     	if (payload == null)
     	{
     		throw new Exception("Empty Payload - Cannot parse");
     	}
-    	
+
     	// version one makes creation time, modification time, and duration 8 bytes.
     	// this is cleanest way ive worked out so far
     	int eightMultiple = (version == 0) ? 3 : 7;
@@ -166,52 +176,53 @@ public class MvhdAtom implements FullBox, NestedAtom, Leaf
     public short version() { return version; }
     public byte[] flags() { return flags; }
     public long creationTime() { return creationTime; }
-	public long modificationTime() { return modificationTime; }
-	public long timescale() { return timescale; }
-	public long duration() { return duration; }
-	public long rate() { return rate; }
-	public int volume() { return volume; }
-	public short[][] matrix() { return matrix; }
-	public long nextTrackID() { return nextTrackID; }
-	public byte[] payload() { return payload; }
-	
-	public void setParent(Box atom)
-	{
-		this.parentAtom = atom;
-	}
-	
-	@Override
-	public String toString() {
-		return "MvhdAtom [size=" + size + ", name=" + name + ", version=" + version + ", flags="
-				+ Arrays.toString(flags) + ", creationTime=" + creationTime + ", modificationTime=" + modificationTime
-				+ ", timescale=" + timescale + ", duration=" + duration + ", rate=" + rate + ", volume=" + volume
-				+ ", matrix=" + Arrays.toString(matrix) + ", nextTrackID=" + nextTrackID + "]";
-	}
+    public long modificationTime() { return modificationTime;  }
+    public long timescale() { return timescale; }
+    public long duration() { return duration; }
+    public long rate() { return rate; }
+    public int volume() { return volume; }
+    public short[][] matrix() { return matrix; }
+    public long nextTrackID() { return nextTrackID; }
+    public byte[] payload() { return payload; }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + Arrays.hashCode(flags);
-		result = prime * result + Arrays.deepHashCode(matrix);
-		result = prime * result + Objects.hash(creationTime, duration, modificationTime, name, nextTrackID, rate, size,
-				timescale, version, volume);
-		return result;
-	}
+    public void setParent(Box atom)
+    {
+        this.parentAtom = atom;
+    }
+    
+    @Override
+    public String toString() 
+    {
+        return "MvhdAtom [size=" + size + ", name=" + name + ", version=" + version + ", flags="
+        		+ Arrays.toString(flags) + ", creationTime=" + creationTime + ", modificationTime=" + modificationTime
+        		+ ", timescale=" + timescale + ", duration=" + duration + ", rate=" + rate + ", volume=" + volume
+        		+ ", matrix=" + Arrays.toString(matrix) + ", nextTrackID=" + nextTrackID + "]";
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		MvhdAtom other = (MvhdAtom) obj;
-		return creationTime == other.creationTime && duration == other.duration && Arrays.equals(flags, other.flags)
-				&& Arrays.deepEquals(matrix, other.matrix) && modificationTime == other.modificationTime
-				&& Objects.equals(name, other.name) && nextTrackID == other.nextTrackID && rate == other.rate
-				&& size == other.size && timescale == other.timescale && version == other.version
-				&& volume == other.volume;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Arrays.hashCode(flags);
+        result = prime * result + Arrays.deepHashCode(matrix);
+        result = prime * result + Objects.hash(creationTime, duration, modificationTime, name, nextTrackID, rate, size,
+        		timescale, version, volume);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        MvhdAtom other = (MvhdAtom) obj;
+        return creationTime == other.creationTime && duration == other.duration && Arrays.equals(flags, other.flags)
+        		&& Arrays.deepEquals(matrix, other.matrix) && modificationTime == other.modificationTime
+        		&& Objects.equals(name, other.name) && nextTrackID == other.nextTrackID && rate == other.rate
+        		&& size == other.size && timescale == other.timescale && version == other.version
+        		&& volume == other.volume;
+    }
 }

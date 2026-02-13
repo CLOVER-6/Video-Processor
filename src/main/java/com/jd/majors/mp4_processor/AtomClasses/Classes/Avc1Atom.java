@@ -8,6 +8,22 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Representation of the ISO Base Media File Format 'avc1' visual sample entry.
+ *
+ * <p>This atom carries codec-level parameters for AVC/H.264 video tracks such as
+ * pixel dimensions, resolution, compressor name, sample description fields and
+ * the data reference index used by decoding and rendering pipelines.</p>
+ *
+ * <p>As a leaf atom this class stores a raw {@code payload} until {@code parse()}
+ * is invoked; {@code parse()} materializes the typed fields from the payload
+ * and clears the raw bytes to avoid holding the buffer in memory.</p>
+ *
+ * <p>Implementation notes: the {@code size} value is authoritative (includes the
+ * atom header), multi-byte reads use unsigned-aware arithmetic and this
+ * implementation implements {@code NestedAtom} so callers should set the parent
+ * reference when the atom is appended to a container.</p>
+ */
 public class Avc1Atom implements NestedAtom, Leaf
 {
 	private Box parentAtom;

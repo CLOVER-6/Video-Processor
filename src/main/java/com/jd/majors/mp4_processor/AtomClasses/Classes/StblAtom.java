@@ -8,6 +8,25 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Representation of the 'stbl' (sample table) container which aggregates all
+ * sample-related tables (for example {@code stsd}, {@code stts}, {@code stsc},
+ * {@code stsz}, {@code stco}/{@code co64}, {@code stss}).
+ *
+ * <p>The sample table provides the demuxer with the information required to
+ * locate, time and interpret samples for a track. It acts as the central
+ * repository for sample descriptions, timing, chunking, sizes and sync sample
+ * indexes.</p>
+ *
+ * <p>As a container this class implements {@code parseChildren(boolean)} to
+ * optionally recurse into nested containers and to invoke {@code parse()} on
+ * leaf children. Callers should set parent references when adding children to
+ * preserve the atom hierarchy.</p>
+ *
+ * <p>Implementation notes: this class implements {@code ContainerBox} and
+ * {@code NestedAtom}; the {@code size} field includes the header and is
+ * authoritative for on-disk layout.</p>
+ */
 public class StblAtom implements ContainerBox, NestedAtom
 {
 	private Box parentAtom;

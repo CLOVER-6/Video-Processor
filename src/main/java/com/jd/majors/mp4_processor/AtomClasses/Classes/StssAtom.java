@@ -9,6 +9,22 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Representation of the 'stss' (sync sample) full box which lists samples that
+ * are synchronization (key) frames for random access.
+ *
+ * <p>The {@code stss} box is an optional table listing the sample indexes of
+ * sync samples (keyframes). Demuxers use it to enable fast seeking and to
+ * identify samples that can be used as random access points.</p>
+ *
+ * <p>This class parses the {@code sampleIndexes} array when {@code parse()} is
+ * invoked; the raw {@code payload} is cleared after parsing to avoid
+ * retaining duplicate buffers.</p>
+ *
+ * <p>Implementation notes: this box implements {@code FullBox} and
+ * {@code NestedAtom}; multi-byte decoding uses unsigned-aware arithmetic and
+ * the {@code size} field is authoritative.</p>
+ */
 public class StssAtom implements FullBox, NestedAtom, Leaf
 {
 	private Box parentAtom;

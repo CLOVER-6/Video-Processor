@@ -7,6 +7,23 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.FullBox;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Representation of the 'iods' (initial object descriptor) full box used in
+ * some MP4 files to carry object descriptor information for systems that use
+ * MPEG-4 Systems descriptors alongside media tracks.
+ *
+ * <p>The box contains a binary object descriptor blob which is semantically
+ * opaque to generic media decoders but necessary for some authoring and
+ * streaming systems that interoperate with MPEG-4 Systems.</p>
+ *
+ * <p>This class stores the raw {@code payload} until {@code parse()} is
+ * invoked; parsing currently discards the payload after validation to avoid
+ * holding the raw descriptor when only higher-level metadata is needed.</p>
+ *
+ * <p>Implementation notes: this is a {@code FullBox} and a {@code NestedAtom};
+ * {@code version} and {@code flags} are preserved and callers should set the
+ * parent reference when attaching the atom to a container.</p>
+ */
 public class IodsAtom implements Leaf, NestedAtom, FullBox
 {
 	private Box parentAtom;

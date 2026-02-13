@@ -7,11 +7,34 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * AtomRegistry holds a mapping from four-character atom names to factory
- * functions that construct atom instances. This central registry makes it
- * easy to extend supported atom types by registering a factory at
- * initialization time.
+ * Central registry and factory dispatcher for MP4/ISO Base Media File Format atoms.
+ *
+ * <p>{@code AtomRegistry} maintains a static mapping between four-character
+ * atom type identifiers (e.g., {@code "moov"}, {@code "mdat"}, {@code "stbl"})
+ * and their corresponding {@link AtomFactory} implementations. This enables
+ * decoupled and extensible atom creation during parsing.</p>
+ *
+ * <p>Atoms are registered via {@link #registerAtom(String, AtomFactory)}.
+ * Registration is idempotent per type and will throw an
+ * {@link IllegalArgumentException} if an attempt is made to overwrite an
+ * existing mapping. This guarantees deterministic factory resolution.</p>
+ *
+ * <p>The {@link #createAtom(int, String, byte[])} method acts as a dispatcher:
+ * it looks up the atom type in the registry and delegates instantiation to
+ * the associated factory. If no mapping exists for the supplied type, the
+ * method returns {@code null}, allowing callers to handle unknown or
+ * unsupported atom types explicitly.</p>
+ *
+ * <p>A static initialization block pre-registers all known and supported
+ * atom types at class load time, covering top-level boxes, movie-level
+ * structures, media containers, sample tables, and metadata-related atoms.
+ * Additional atom types may be registered at runtime before parsing begins
+ * to extend format support without modifying core parsing logic.</p>
+ *
+ * <p>This class is non-instantiable and serves purely as a static utility
+ * and configuration component within the parsing subsystem.</p>
  */
+
 public class AtomRegistry 
 {
 	private static final Map<String, AtomFactory> registry = new HashMap<String, AtomFactory>();

@@ -9,6 +9,21 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Representation of a URL/URN data reference atom (commonly {@code "url "}
+ * or {@code "urn "}) which contains an ASCII/ISO-8859-1 string identifying
+ * the location of referenced data.
+ *
+ * <p>These atoms are commonly the children of {@code dref} and hold either a
+ * file-relative or network resource identifier. They are typically small
+ * string-containing boxes and are parsed into a {@code urx} string by
+ * {@code parse()}.</p>
+ *
+ * <p>Implementation notes: this class implements {@code FullBox} and
+ * {@code NestedAtom}. The raw {@code payload} is retained until parsing and
+ * is cleared afterwards; handler code should treat the {@code urx} value as
+ * authoritative.</p>
+ */
 //can be url or urn, hence ur(x)
 public class UrxAtom implements NestedAtom, FullBox, Leaf
 {

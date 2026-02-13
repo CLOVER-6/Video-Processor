@@ -7,6 +7,24 @@ import java.util.Objects;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.TopLevelAtom;
 
+/**
+ * Representation of the top-level 'ftyp' (file type) box which identifies the
+ * major brand, minor version and compatible brands for the file.
+ *
+ * <p>The {@code ftyp} atom appears near the beginning of an MP4 file and is
+ * used by players and tools to determine compatibility and feature sets (brand
+ * signaling). It contains the four-character major brand, a 32-bit minor
+ * version, and an array of compatible four-character brand identifiers.</p>
+ *
+ * <p>This class stores a raw {@code payload} until {@code parse()} is called to
+ * materialize {@code majorBrand}, {@code minorVersion} and
+ * {@code compatibleBrands}. After parsing the raw buffer is cleared to avoid
+ * retaining duplicate state in memory.</p>
+ *
+ * <p>Implementation notes: this is a {@code TopLevelAtom} and a {@code Leaf};
+ * the {@code size} includes the atom header and multi-byte fields should be
+ * read using unsigned-aware arithmetic.</p>
+ */
 public class FtypAtom implements Leaf, TopLevelAtom
 {
     private int size;

@@ -13,12 +13,23 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 import com.jd.majors.mp4_processor.Parsing.AtomRegistry;
 
 /**
- * Sample description atom (stsd).
+ * Representation of the 'stsd' (sample description) full box which contains
+ * codec-specific sample description entries (for example {@code avc1}).
  *
- * Notes:
- * - Contains a list of sample description atoms (e.g. AVC codec boxes).
- * - This implementation enforces that sample descriptions are `AvcAtom` instances.
- * - The internal payload is cleared after parsing to prevent re-parsing.
+ * <p>The {@code stsd} box enumerates the sample descriptions used by a track
+ * and contains child sample entry atoms. Each entry describes codec and
+ * configuration information needed to decode samples belonging to that
+ * description index.</p>
+ *
+ * <p>When instantiated with a raw {@code payload} this class defers creating
+ * child sample description atoms until {@code parse()} is invoked; after
+ * parsing the raw payload is cleared and child atoms are attached to this
+ * container.</p>
+ *
+ * <p>Implementation notes: this class implements {@code FullBox},
+ * {@code ContainerBox} and {@code NestedAtom}. The constructor enforces that
+ * child sample descriptions are of supported types (for example AVC1) where
+ * applicable, and callers should set the parent when adding children.</p>
  */
 public class StsdAtom implements FullBox, NestedAtom, ContainerBox, Leaf
 {

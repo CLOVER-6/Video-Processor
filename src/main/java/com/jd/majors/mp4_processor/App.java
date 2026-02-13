@@ -58,7 +58,7 @@ public class App
 
 	public static void main( String[] args ) throws Exception
 	{
-		RandomAccessFile file = new RandomAccessFile("Z:\\smpte.mp4", "r");
+		RandomAccessFile file = new RandomAccessFile("/home/jd/eclipse-workspace/mp4-processor/test-videos/smpte.mp4", "r");
 
 		// Get the file channel
 		FileChannel channel = file.getChannel();

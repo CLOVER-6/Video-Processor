@@ -7,6 +7,24 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Representation of the 'stsc' (sample-to-chunk) full box which maps samples
+ * to chunks and sample description indices.
+ *
+ * <p>The {@code stsc} table describes how samples are grouped into chunks and
+ * which sample description (codec entry) applies to each range of chunks. It
+ * is essential for a demuxer to reconstruct sample boundaries and associate
+ * samples with the correct decoder configuration.</p>
+ *
+ * <p>This class defers reading the {@code chunks} table until {@code parse()}
+ * is invoked; after parsing the raw {@code payload} is cleared to avoid
+ * retaining duplicate data. Consumers should rely on the parsed {@code
+ * chunks} array after parsing completes.</p>
+ *
+ * <p>Implementation notes: this box is a {@code FullBox} and implements
+ * {@code NestedAtom}; the implementation uses unsigned-aware arithmetic for
+ * multi-byte fields and the {@code size} field is authoritative.</p>
+ */
 public class StscAtom implements FullBox, NestedAtom, Leaf
 {
 	private Box parentAtom;

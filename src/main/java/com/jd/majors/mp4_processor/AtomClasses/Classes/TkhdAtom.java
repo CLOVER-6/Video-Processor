@@ -9,11 +9,24 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
 /**
- * Track header atom (tkhd).
+ * Representation of the 'tkhd' (track header) full box which contains per-
+ * track presentation metadata such as track id, duration, layer, volume and
+ * display dimensions.
  *
- * Notes:
- * - Several fields are version-dependent (timestamps and duration).
- * - Parses the track header and then clears payload to prevent re-parsing.
+ * <p>The track header identifies a track inside the movie and provides the
+ * essential fields required for timeline composition and rendering. Many
+ * fields are fixed-size integers or matrices used by playback systems to map
+ * samples to the presentation.</p>
+ *
+ * <p>This class keeps a raw {@code payload} until {@code parse()} extracts the
+ * typed header fields; after parsing the payload is cleared to reduce memory
+ * usage. The class preserves {@code version} and {@code flags} from the
+ * full box header.</p>
+ *
+ * <p>Implementation notes: {@code TkhdAtom} implements {@code FullBox} and
+ * {@code NestedAtom}; callers should set the parent when attaching the atom to
+ * a container. Multi-byte fields must be read with unsigned-aware arithmetic
+ * and the {@code size} field is authoritative.</p>
  */
 public class TkhdAtom implements FullBox, NestedAtom, Leaf
 {

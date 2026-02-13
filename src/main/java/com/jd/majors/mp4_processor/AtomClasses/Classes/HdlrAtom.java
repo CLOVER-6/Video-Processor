@@ -8,6 +8,25 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Representation of the 'hdlr' (handler reference) full box which specifies
+ * the media handler type and human-readable name for a track or media box.
+ *
+ * <p>The handler atom indicates how the media in a track should be interpreted
+ * (for example {@code "vide"}, {@code "soun"}, {@code "meta"}) and may
+ * contain a variable-length, NUL-terminated name used for debugging or UI
+ * purposes.</p>
+ *
+ * <p>This class stores a raw {@code payload} until {@code parse()} extracts the
+ * {@code handlerType} and {@code handlerName}; the payload is cleared after
+ * parsing to reduce memory use. The class preserves {@code version} and
+ * {@code flags} as required by the full box format.</p>
+ *
+ * <p>Implementation notes: {@code HdlrAtom} implements {@code FullBox} and
+ * {@code NestedAtom}; callers should set the parent when attaching the atom to
+ * a container. Multi-byte fields are handled with unsigned-aware arithmetic.
+ * </p>
+ */
 public class HdlrAtom implements FullBox, NestedAtom, Leaf
 {
 	private Box parentAtom;

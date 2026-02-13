@@ -7,6 +7,26 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Representation of the 'stco' (chunk offset) full box which lists 32-bit
+ * file offsets for each chunk in a track's sample table.
+ *
+ * <p>The {@code stco} box provides the demuxer with the file byte positions
+ * of each chunk so that sample data contained in {@code mdat} can be located
+ * and read. When files are small enough to use 32-bit offsets this box is
+ * preferred; otherwise {@code co64} (64-bit offsets) is used.</p>
+ *
+ * <p>This class defers materialization of the {@code chunkOffsets} array until
+ * {@code parse()} is called; after parsing the raw {@code payload} is cleared
+ * to avoid retaining duplicate data. Consumers should treat the
+ * {@code entryCount} and {@code chunkOffsets} as authoritative once parsing
+ * completes.</p>
+ *
+ * <p>Implementation notes: this is a {@code FullBox} and implements
+ * {@code NestedAtom}; multi-byte integer decoding uses unsigned-aware
+ * arithmetic. Callers should set the parent reference when attaching this
+ * atom to a container.</p>
+ */
 public class StcoAtom implements FullBox, NestedAtom, Leaf
 {
 	private Box parentAtom;

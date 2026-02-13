@@ -9,6 +9,22 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Representation of the 'ilst' (item list) metadata container used in the
+ * metadata (meta) atom to group individual metadata items.
+ *
+ * <p>The {@code ilst} container holds a sequence of child atoms that each
+ * represent a metadata entry (for example title, artist or artwork). Parsers
+ * use the contained child atoms to construct high-level metadata structures.</p>
+ *
+ * <p>As a container this class provides {@code parseChildren(boolean)} to
+ * optionally recurse into nested containers and to call {@code parse()} on
+ * leaf children. Implementations should clear raw payload buffers after
+ * materializing children to avoid duplicate data retention.</p>
+ *
+ * <p>Implementation notes: this atom implements {@code ContainerBox} and
+ * {@code NestedAtom} and therefore maintains and exposes a parent reference.</p>
+ */
 public class IlstAtom implements ContainerBox, NestedAtom
 {
 	private Box parentAtom;

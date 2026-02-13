@@ -9,6 +9,23 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Representation of the 'dinf' (data information) container atom.
+ *
+ * <p>This container groups data-reference related child atoms (for example
+ * {@code dref}) that describe where track media data is stored. It acts as a
+ * logical grouping used by track/media handler implementations.</p>
+ *
+ * <p>As a container this class holds a {@code List<Box>} of child atoms and
+ * implements {@code parseChildren(boolean)} to optionally recurse into child
+ * containers and invoke {@code parse()} on leaf children. Callers may choose
+ * whether child containers are parsed recursively.</p>
+ *
+ * <p>Implementation details: this class implements {@code NestedAtom} and
+ * {@code ContainerBox}; parent linkage should be set when the container is
+ * attached. The {@code size} field includes the container header and is
+ * authoritative for on-disk layout.</p>
+ */
 public class DinfAtom implements NestedAtom, ContainerBox 
 {
 	private Box parentAtom;

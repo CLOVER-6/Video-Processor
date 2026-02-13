@@ -7,6 +7,19 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.TopLevelAtom;
 
+/**
+ * Representation of the 'skip' atom used for padding or ignored regions inside
+ * an MP4 file.
+ *
+ * <p>The {@code skip} box is semantically equivalent to {@code free} in that
+ * it carries uninterpreted bytes which should be ignored by decoders. It is
+ * useful for reserving space or marking portions of a file for tools.</p>
+ *
+ * <p>This class retains a raw {@code payload} until {@code parse()} is called
+ * at which point the buffer is cleared. It implements both top-level and
+ * nested semantics so it can appear in multiple locations within the file
+ * hierarchy.</p>
+ */
 public class SkipAtom implements Leaf, TopLevelAtom, NestedAtom
 {
 	private Box parentAtom;

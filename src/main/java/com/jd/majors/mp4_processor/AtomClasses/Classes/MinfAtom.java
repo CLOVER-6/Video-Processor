@@ -8,6 +8,24 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Representation of the 'minf' (media information) container atom which
+ * groups media-subsystem atoms such as sample table, data information and
+ * handlers needed to interpret track samples.
+ *
+ * <p>The {@code minf} container organizes track-level boxes (for example
+ * {@code stbl}, {@code dinf}, {@code vmhd}/{@code smhd}) that describe how the
+ * media samples for the track are structured and where they are stored.</p>
+ *
+ * <p>As a container this class provides {@code parseChildren(boolean)} to
+ * optionally recurse into nested containers and to call {@code parse()} on
+ * leaf children. Clearing raw payload buffers after parsing is recommended to
+ * avoid retaining large intermediate byte arrays.</p>
+ *
+ * <p>Implementation notes: this atom implements {@code ContainerBox} and
+ * {@code NestedAtom} and maintains parent linkage when child atoms are added.
+ * The {@code size} field is authoritative for on-disk layout.</p>
+ */
 public class MinfAtom implements ContainerBox, NestedAtom 
 {
 	private Box parentAtom;

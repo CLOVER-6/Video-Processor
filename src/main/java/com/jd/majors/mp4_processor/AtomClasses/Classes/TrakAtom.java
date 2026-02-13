@@ -1,4 +1,3 @@
-
 package com.jd.majors.mp4_processor.AtomClasses.Classes;
 
 import java.util.ArrayList;
@@ -9,6 +8,23 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Representation of the 'trak' (track) container which groups the metadata and
+ * sample description for a single track in the movie.
+ *
+ * <p>A {@code trak} container typically contains a {@code tkhd} (track header),
+ * {@code mdia} (media) container and related child atoms that fully describe
+ * a track's timing, media type and sample organization.</p>
+ *
+ * <p>As a container this class exposes {@code parseChildren(boolean)} to
+ * optionally recurse into nested containers and invoke {@code parse()} on
+ * leaf children. Parent linkage should be set when child atoms are added to
+ * ensure correct hierarchical relationships.</p>
+ *
+ * <p>Implementation notes: the {@code size} field is authoritative for on-disk
+ * layout and this class implements {@code ContainerBox} and
+ * {@code NestedAtom}.</p>
+ */
 public class TrakAtom implements ContainerBox, NestedAtom 
 {
 	private Box parentAtom;

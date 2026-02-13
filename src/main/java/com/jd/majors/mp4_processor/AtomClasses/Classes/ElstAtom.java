@@ -7,6 +7,42 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Representation of the {@code 'elst'} (edit list) atom, a FullBox defined
+ * within a {@code trak} container that specifies temporal edits for a track.
+ *
+ * <p>The {@code elst} atom provides a table of edit list entries describing how
+ * the associated media timeline is mapped into the overall movie timeline.
+ * Each entry consists of a segment duration, media time, media rate, and
+ * media rate fraction. Together, these fields allow for operations such as
+ * delaying track start, trimming, looping, or creating empty edits.</p>
+ *
+ * <p>This implementation supports both parsed and unparsed states. When
+ * constructed with a raw payload, {@link #parse()} must be invoked to extract
+ * the {@code entryCount} and the corresponding {@code entries} table. The
+ * payload is interpreted using big-endian byte order in accordance with the
+ * ISO Base Media File Format specification. After successful parsing, the
+ * internal payload reference is cleared to prevent re-parsing and to reduce
+ * memory retention.</p>
+ *
+ * <p>Each entry in {@code entries} is stored as a {@code long[4]} in the
+ * following order:</p>
+ * <ul>
+ *   <li>Index 0 – segment duration</li>
+ *   <li>Index 1 – media time</li>
+ *   <li>Index 2 – media rate (integer portion)</li>
+ *   <li>Index 3 – media rate fraction</li>
+ * </ul>
+ *
+ * <p>As a {@code NestedAtom}, this atom maintains a reference to its parent
+ * {@code Box}. As a {@code Leaf}, it does not contain child atoms.</p>
+ *
+ * <p>Implementation notes: treat the {@code size} field as authoritative when
+ * validating structure boundaries. Because Java bytes are signed, parsing
+ * masks each byte with {@code 0xFF} before bit-shifting to correctly assemble
+ * unsigned multi-byte values.</p>
+ */
+
 public class ElstAtom implements FullBox, NestedAtom, Leaf
 {
 	private Box parentAtom;

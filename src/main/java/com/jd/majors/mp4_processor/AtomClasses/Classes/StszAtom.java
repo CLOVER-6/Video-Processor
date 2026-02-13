@@ -7,6 +7,23 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Representation of the 'stsz' (sample size) full box which provides either a
+ * constant sample size or a table of per-sample sizes.
+ *
+ * <p>The {@code stsz} box is used by demuxers to determine how many bytes to
+ * read for each sample. When a constant sample size is provided all samples
+ * use the same size; otherwise a per-sample table is supplied.</p>
+ *
+ * <p>This class stores a raw {@code payload} until {@code parse()} populates
+ * {@code sampleSize}, {@code entryCount}, and {@code sampleSizes}. After
+ * parsing the payload is cleared to avoid duplicated memory.</p>
+ *
+ * <p>Implementation notes: this box implements {@code FullBox} and
+ * {@code NestedAtom}; multi-byte fields must be decoded using unsigned-aware
+ * arithmetic and callers should set the parent reference when attaching the
+ * atom to a container.</p>
+ */
 public class StszAtom implements FullBox, NestedAtom, Leaf
 {
 	private Box parentAtom;

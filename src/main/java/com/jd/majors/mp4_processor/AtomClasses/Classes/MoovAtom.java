@@ -10,6 +10,23 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.TopLevelAtom;
 
+/**
+ * Representation of the top-level 'moov' (movie) container atom which groups
+ * all movie-level metadata (tracks, movie header, and related containers).
+ *
+ * <p>The {@code moov} container contains child atoms such as {@code mvhd}
+ * (movie header) and one or more {@code trak} (track) containers. It is the
+ * canonical location for metadata needed before or during playback.</p>
+ *
+ * <p>As a container this class exposes {@code parseChildren(boolean)} to
+ * recurse into child containers and to call {@code parse()} on leaf children
+ * when desired. Implementations should set parent references for child atoms
+ * when they are added.</p>
+ *
+ * <p>Implementation notes: treat the {@code size} field as authoritative and
+ * prefer clearing raw payloads for parsed child atoms to reduce memory
+ * retention.</p>
+ */
 public class MoovAtom implements TopLevelAtom, ContainerBox 
 {
 	private final int size;

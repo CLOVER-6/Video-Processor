@@ -7,6 +7,22 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Representation of the 'vmhd' (video media header) full box which provides
+ * video-rendering hints such as graphics mode and operation colours.
+ *
+ * <p>This atom contains renderer-specific hints used by some players to
+ * configure compositing or blending behavior. These fields are optional for
+ * basic decoding but useful for accurate rendering in certain toolchains.</p>
+ *
+ * <p>The class stores a raw {@code payload} until {@code parse()} populates the
+ * {@code graphicsMode} and {@code opcolours} fields and clears the payload to
+ * avoid holding large intermediate buffers.</p>
+ *
+ * <p>Implementation notes: {@code VmhdAtom} implements {@code FullBox} and
+ * {@code NestedAtom}; it preserves {@code version} and {@code flags} from the
+ * header and uses unsigned-aware arithmetic when reading multi-byte fields.</p>
+ */
 public class VmhdAtom implements FullBox, NestedAtom, Leaf
 {
 	private Box parentAtom;

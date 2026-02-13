@@ -7,6 +7,24 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Representation of the 'co64' atom (64-bit chunk offsets) used in large
+ * media files where 32-bit offsets (stco) are inadequate.
+ *
+ * <p>This full box enumerates the file byte offsets of each chunk for a track.
+ * The {@code chunkOffsets} array (when populated) contains absolute 64-bit
+ * positions used by demuxers to locate media data in the file.</p>
+ *
+ * <p>As a leaf atom this class defers populating {@code chunkOffsets} until
+ * {@code parse()} is called. After parsing the implementation clears the raw
+ * {@code payload} to reduce memory usage; callers should not rely on the raw
+ * payload once parsing completes.</p>
+ *
+ * <p>Implementation details: this class implements {@code FullBox} and
+ * {@code NestedAtom}; the constructor preserves {@code version} and
+ * {@code flags}. The {@code size} field is treated as authoritative and
+ * multi-byte values must be read using unsigned-aware arithmetic.</p>
+ */
 public class Co64Atom implements FullBox, NestedAtom, Leaf
 {
 	private Box parentAtom;

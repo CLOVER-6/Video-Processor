@@ -7,6 +7,23 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Box;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 
+/**
+ * Representation of the 'ctts' (composition time to sample) full box.
+ *
+ * <p>This atom maps sample presentation offsets relative to decoding order
+ * (composition offsets). It stores an array of entries that map a run-length
+ * of samples to a composition time offset used by presentation timing.</p>
+ *
+ * <p>The class stores a raw {@code payload} until {@code parse()} is invoked,
+ * at which point the {@code entries} matrix and {@code entryCount} are
+ * materialized and the raw buffer is cleared to avoid duplicate parsing and
+ * excessive memory retention.</p>
+ *
+ * <p>Implementation notes: {@code CttsAtom} implements {@code FullBox} and
+ * {@code NestedAtom}; callers should set the parent when attaching to a
+ * container. Version and flags are preserved from the header and multi-byte
+ * reads use unsigned-aware arithmetic.</p>
+ */
 public class CttsAtom implements FullBox, NestedAtom, Leaf
 {
 	private Box parentAtom;

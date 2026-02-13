@@ -8,6 +8,23 @@ import com.jd.majors.mp4_processor.AtomClasses.Interfaces.Leaf;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.NestedAtom;
 import com.jd.majors.mp4_processor.AtomClasses.Interfaces.TopLevelAtom;
 
+/**
+ * Representation of the 'free' atom which provides padding or placeholder space
+ * inside an MP4 file.
+ *
+ * <p>The {@code free} box contains uninterpreted bytes that are typically used
+ * for alignment or to reserve space for later edits. Media tools should ignore
+ * its payload; its presence does not affect decoding semantics.</p>
+ *
+ * <p>This class keeps a raw {@code payload} until {@code parse()} is invoked,
+ * at which point the buffer is discarded. Implementations should avoid
+ * exposing the raw payload for external processing since it is semantically
+ * opaque.</p>
+ *
+ * <p>Implementation notes: this atom can be used as a nested child or a
+ * top-level atom and therefore implements both {@code NestedAtom} and
+ * {@code TopLevelAtom}.</p>
+ */
 public class FreeAtom implements Leaf, TopLevelAtom, NestedAtom
 {
 	Box parentAtom;
