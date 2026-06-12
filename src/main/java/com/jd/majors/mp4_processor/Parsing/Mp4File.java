@@ -111,7 +111,7 @@ public class Mp4File
 			size = size | (rawAtom[i] & 0xFF) << 8 * eightMultiple;
 			eightMultiple = eightMultiple - 1;
 		}
-		
+
 		// use ISO_8859_1 to get 1:1 byte to char mapping
 		// utf-8 would mangle non-ascii chars 
 		String name = new String(Arrays.copyOfRange(rawAtom, 4, 8), StandardCharsets.ISO_8859_1);
@@ -137,7 +137,7 @@ public class Mp4File
 	{
 		int offset = 0;
 		topLevelAtoms = new java.util.ArrayList<Box>();
-		
+
 		// a hashmap to hold container atoms and their end offsets in order to manage nesting
 		// linked hashmap keeps order when calling keyset 
 		LinkedHashMap<ContainerBox, Integer> containerAtoms = new LinkedHashMap<ContainerBox, Integer>();
@@ -149,7 +149,7 @@ public class Mp4File
 			// some atoms can be in a container or top-level
 			// flag to track if atom has been added to a container to prevent adding to top-level list
 			boolean isInContainer = false;
-			
+
 			// error handling
 			if (atom == null)
 			{
@@ -172,14 +172,14 @@ public class Mp4File
 			{
 				List<ContainerBox> containerAtomsList = new java.util.ArrayList<ContainerBox>(containerAtoms.keySet());
 				List<ContainerBox> containerAtomsListReversed = new java.util.ArrayList<ContainerBox>();
-				
+
 				// reverse to check innermost containers first
 				for (ContainerBox box : containerAtomsList)
 				{
 					containerAtomsListReversed.add(box); 
 				}
 				Collections.reverse(containerAtomsListReversed);
-				
+
 				// nesting management
 				for (ContainerBox containerAtom : containerAtomsListReversed)
 				{
@@ -194,18 +194,18 @@ public class Mp4File
 					}
 				}
 			}
-			
+
 			if (atom instanceof TopLevelAtom && isInContainer == false)
 			{
 				topLevelAtoms.add(atom);
 			}
-			
+
 			if (atom instanceof ContainerBox)
 			{
 				// add to container atom map with end offset
 				containerAtoms.put((ContainerBox) atom, offset + atom.size());
 			}
-			
+
 			// move offset
 			if (atom instanceof Leaf)
 			{
@@ -222,7 +222,7 @@ public class Mp4File
 				offset = offset + 8;
 			}
 		}
-		
+
 		boolean recursiveParseFlag = true;
 		for (Box topLevelAtom : topLevelAtoms)
 		{
@@ -230,13 +230,43 @@ public class Mp4File
 			{
 				((Leaf) topLevelAtom).parse();
 			}
-			
+
 			if (topLevelAtom instanceof ContainerBox)
 			{
 				((ContainerBox) topLevelAtom).parseChildren(recursiveParseFlag);;
 			}
 		}
 	}
-	
+
+	// display entire mp4 structure in a nice format
+	// verbosity decides if to display all atom values and names vs just names
+	public void displayMP4File(boolean verbose) {
+		for (Box atom : this.topLevelAtoms()) {
+			printAtom(atom, 0, verbose);
+		}
+	}
+
+	// method just for displayMP4File()
+	private static void printAtom(Box atom, int depth, boolean verbose) {
+		// indentation based on nesting depth
+		String indent = "  ".repeat(depth);
+
+		if (verbose)
+		{
+			System.out.println(indent + "- " + atom.toString());
+		}
+		else
+		{
+			System.out.println(indent + "- " + atom.getClass().getSimpleName());
+		}
+		// recurse into children if this is a container
+		if (atom instanceof ContainerBox container) {
+			List<? extends Box> children = container.childAtoms();
+			for (Box child : children) {
+				printAtom(child, depth + 1, verbose);
+			}
+		}
+	}
+
 	public List<Box> topLevelAtoms() { return topLevelAtoms; }
 }
