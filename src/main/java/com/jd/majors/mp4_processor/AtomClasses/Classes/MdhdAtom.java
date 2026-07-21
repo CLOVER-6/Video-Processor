@@ -144,9 +144,11 @@ public class MdhdAtom implements FullBox, NestedAtom, Leaf
         this.parentAtom = atom;
     }
 
-    @Override
+@Override
     public String toString() {
-        return "MdhdAtom [size=" + size + ", name=" + name + ", version=" + version + "]";
+        return "MdhdAtom [size=" + size + ", name=" + name + ", version=" + version + ", flags=" + Arrays.toString(flags) 
+        + ", creationTime=" + creationTime + ", modificationTime=" + modificationTime + ", timescale=" + timescale + 
+        ", duration=" + duration + ", language=" + language + "]";
     }
 
     @Override
